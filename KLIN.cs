@@ -35,7 +35,7 @@ namespace SmartPGTBot.ABSoftware
                 {
                     KLINToken kt = new KLINToken();
                     kt.Property = Lines[i].Split('=')[0];
-                    kt.value = Lines[i].Split(new char[] { '=' }, 2)[2];
+                    kt.value = Lines[i].Split(new char[] { '=' }, 2)[1];
                     tokens.Add(kt);
                 }
             }
