@@ -25,7 +25,7 @@ namespace SmartPGTBot.ABSoftware
             tokens.Add(kt);
         }
 
-        public static void Parse(string KLIN)
+        public void Parse(string KLIN)
         {
             KLCODE = KLIN;
             string[] Lines = KLIN.Split('\n');
