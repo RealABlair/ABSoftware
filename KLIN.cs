@@ -9,15 +9,15 @@ namespace SmartPGTBot.ABSoftware
     public class KLIN
     {
         const string v = "1.0b";
-        static string KLCODE;
-        static List<KLINToken> tokens = new List<KLINToken>();
+        string KLCODE;
+        List<KLINToken> tokens = new List<KLINToken>();
 
         public KLIN()
         {
 
         }
 
-        public static void Add(string Property, object value)
+        public void Add(string Property, object value)
         {
             KLINToken kt = new KLINToken();
             kt.Property = Property;
@@ -25,7 +25,7 @@ namespace SmartPGTBot.ABSoftware
             tokens.Add(kt);
         }
 
-        public static void Parse(string KLIN)
+        public void Parse(string KLIN)
         {
             KLCODE = KLIN;
             string[] Lines = KLIN.Split('\n');
@@ -41,7 +41,7 @@ namespace SmartPGTBot.ABSoftware
             }
         }
 
-        public static object Get(string Property)
+        public object Get(string Property)
         {
             for(int i = 0; i < tokens.Count; i++)
             {
