@@ -37,7 +37,7 @@ namespace ABSoftware
         static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer, int dwSize, out int lpNumberOfBytesRead);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer, int dwSize,  out IntPtr lpNumberOfBytesRead);
+        static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer, int dwSize, out IntPtr lpNumberOfBytesRead);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out, MarshalAs(UnmanagedType.AsAny)] object lpBuffer, int dwSize, out IntPtr lpNumberOfBytesRead);
@@ -305,7 +305,7 @@ namespace ABSoftware
                             {
                                 if (buffer[i + 2] == data[2])
                                 {
-                                    if(buffer[i + 3] == data[3])
+                                    if (buffer[i + 3] == data[3])
                                     {
                                         int MyAddress = (int)_BASIC_INFORMATION.BaseAddress + i;
                                         l.Add(MyAddress);
@@ -345,7 +345,7 @@ namespace ABSoftware
         public long GetAddress64(byte[] data)
         {
             string ret = "";
-            for(int i = data.Length - 1; i > -1; i--)
+            for (int i = data.Length - 1; i > -1; i--)
             {
                 ret += data[i].ToString("X2");
             }
@@ -394,7 +394,7 @@ namespace ABSoftware
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
             ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
-            for(int i = 0; i < offsets.Length; i++)
+            for (int i = 0; i < offsets.Length; i++)
             {
                 long addr = GetAddress64(buffer);
                 addr += offsets[i];
@@ -456,6 +456,27 @@ namespace ABSoftware
             int outIntPtr = 0; //I DON`T NEED IT
             ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
             return BitConverter.ToDouble(buffer, 0);
+        }
+
+        public string ReadString(long address, int maxChars)
+        {
+            byte[] buffer = new byte[maxChars];
+            IntPtr IpAddress = (IntPtr)address;
+            int outIntPtr = 0; //I DON`T NEED IT
+            ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
+            string ou = "";
+            for(int i = 0; i < buffer.Length - 1; i++)
+            {
+                if(buffer[i] == 0x00 && buffer[i + 1] == 0x00)
+                {
+                    break;
+                }
+                else
+                {
+                    ou += char.ConvertFromUtf32(buffer[i]);
+                }
+            }
+            return ou;
         }
 
         //WRITE MEMORY
