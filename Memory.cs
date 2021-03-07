@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -16,6 +16,21 @@ namespace ABSoftware
         {
             return OpenProcess((uint)flags, false, proc.Id);
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MEMORY_BASIC_INFORMATION
+        {
+            public IntPtr BaseAddress;
+            public IntPtr AllocationBase;
+            public uint AllocationProtect;
+            public IntPtr RegionSize;
+            public uint State;
+            public uint Protect;
+            public uint Type;
+        }
+        // VirtualQueryEx
+        [DllImport("kernel32.dll")]
+        static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength);
 
         #region READ_PROC_MEM
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -78,6 +93,65 @@ namespace ABSoftware
             {
                 handle = OpenProcess(p, ProcessAccessFlags.All);
             }
+        }
+
+        public int ReadSignature(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x59ffffff)
+        {
+            MEMORY_BASIC_INFORMATION memory_basic_information;
+            memory_basic_information.BaseAddress = IntPtr.Zero;
+            memory_basic_information.RegionSize = IntPtr.Zero;
+            int num = 0;
+            int address = minAddress;
+            while (address < maxAddress)
+            {
+                VirtualQueryEx(handle, (IntPtr)address, out memory_basic_information, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+                if (address == (((long)memory_basic_information.BaseAddress) + ((long)memory_basic_information.RegionSize)))
+                {
+                    break;
+                }
+                address = (((int)memory_basic_information.BaseAddress) + ((int)memory_basic_information.RegionSize));
+                byte[] lpBuffer = new byte[(int)memory_basic_information.RegionSize];
+                int lpNumberOfBytesRead = 0;
+                ReadProcessMemory(handle, memory_basic_information.BaseAddress, lpBuffer, lpBuffer.Length, out lpNumberOfBytesRead);
+                for (int i = 0; i < (lpBuffer.Length - signature.Length); i++)
+                {
+                    if ((lpBuffer[i] == signature[0]) && (lpBuffer[i + 1] == signature[1]))
+                    {
+                        for (int j = 0; j < signature.Length; j++)
+                        {
+                            if ((lpBuffer[i + j] == signature[j]) || (mask[j] == '?'))
+                            {
+                                num++;
+                                if (num == signature.Length)
+                                {
+                                    int addr = ((int)memory_basic_information.BaseAddress) + i;
+                                    return addr;
+                                }
+                            }
+                            else
+                            {
+                                num = 0;
+                            }
+                        }
+                    }
+                }
+                lpBuffer = null;
+            }
+            return 0;
+        }
+
+        private bool SignatureMatch(byte[] signature, byte[] buffer, string mask)
+        {
+            for(int i = 0; i < signature.Length; i++)
+            {
+                if(mask[i] == '?')
+                    continue;
+                if(signature[i] != buffer[i] && mask[i] == 'x')
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public int GetInt(byte[] data)
