@@ -95,7 +95,7 @@ namespace ABSoftware
             }
         }
 
-        public int ReadSignature(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x59ffffff)
+        public int ReadSignature(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x7f000000)
         {
             MEMORY_BASIC_INFORMATION memory_basic_information;
             memory_basic_information.BaseAddress = IntPtr.Zero;
@@ -140,18 +140,184 @@ namespace ABSoftware
             return 0;
         }
 
-        private bool SignatureMatch(byte[] signature, byte[] buffer, string mask)
+        public List<int> ReadInts(int scanObject, int minAddress = 0x00000000, int maxAddress = 0x7f000000)
         {
-            for(int i = 0; i < signature.Length; i++)
+            List<int> l = new List<int>();
+            int address = minAddress;
+            byte[] data = Convertation.GetBytes(scanObject);
+            MEMORY_BASIC_INFORMATION _BASIC_INFORMATION;
+            _BASIC_INFORMATION.RegionSize = IntPtr.Zero;
+            _BASIC_INFORMATION.RegionSize = IntPtr.Zero;
+            while (address <= maxAddress)
             {
-                if(mask[i] == '?')
-                    continue;
-                if(signature[i] != buffer[i] && mask[i] == 'x')
+                VirtualQueryEx(handle, (IntPtr)address, out _BASIC_INFORMATION, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+                if (address != (uint)_BASIC_INFORMATION.BaseAddress + (uint)_BASIC_INFORMATION.RegionSize)
                 {
-                    return false;
+                    byte[] buffer = new byte[(uint)_BASIC_INFORMATION.RegionSize];
+                    int Dammy = 0;
+                    ReadProcessMemory(handle, (IntPtr)_BASIC_INFORMATION.BaseAddress, buffer, (int)_BASIC_INFORMATION.RegionSize, out Dammy);
+                    for (int i = 0; i < buffer.Length - data.Length; i++)
+                    {
+                        if (buffer[i] == data[0])
+                        {
+                            if (buffer[i + 1] == data[1])
+                            {
+                                if (buffer[i + 2] == data[2])
+                                {
+                                    if (buffer[i + 3] == data[3])
+                                    {
+                                        int MyAddress = (int)_BASIC_INFORMATION.BaseAddress + i;
+                                        l.Add(MyAddress);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
+                address = (int)_BASIC_INFORMATION.BaseAddress + (int)_BASIC_INFORMATION.RegionSize;
             }
-            return true;
+            return l;
+        }
+
+        public List<int> ReadLongs(long scanObject, int minAddress = 0x00000000, int maxAddress = 0x7f000000)
+        {
+            List<int> l = new List<int>();
+            int address = minAddress;
+            byte[] data = Convertation.GetBytes(scanObject);
+            MEMORY_BASIC_INFORMATION _BASIC_INFORMATION;
+            _BASIC_INFORMATION.RegionSize = IntPtr.Zero;
+            _BASIC_INFORMATION.RegionSize = IntPtr.Zero;
+            while (address <= maxAddress)
+            {
+                VirtualQueryEx(handle, (IntPtr)address, out _BASIC_INFORMATION, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+                if (address != (uint)_BASIC_INFORMATION.BaseAddress + (uint)_BASIC_INFORMATION.RegionSize)
+                {
+                    byte[] buffer = new byte[(uint)_BASIC_INFORMATION.RegionSize];
+                    int Dammy = 0;
+                    ReadProcessMemory(handle, (IntPtr)_BASIC_INFORMATION.BaseAddress, buffer, (int)_BASIC_INFORMATION.RegionSize, out Dammy);
+                    for (int i = 0; i < buffer.Length - data.Length; i++)
+                    {
+                        if (buffer[i] == data[0])
+                        {
+                            if (buffer[i + 1] == data[1])
+                            {
+                                if (buffer[i + 2] == data[2])
+                                {
+                                    if (buffer[i + 3] == data[3])
+                                    {
+                                        if (buffer[i + 4] == data[4])
+                                        {
+                                            if (buffer[i + 5] == data[5])
+                                            {
+                                                if (buffer[i + 6] == data[6])
+                                                {
+                                                    if (buffer[i + 7] == data[7])
+                                                    {
+                                                        int MyAddress = (int)_BASIC_INFORMATION.BaseAddress + i;
+                                                        l.Add(MyAddress);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                address = (int)_BASIC_INFORMATION.BaseAddress + (int)_BASIC_INFORMATION.RegionSize;
+            }
+            return l;
+        }
+
+        public List<int> ReadDoubles(double scanObject, int minAddress = 0x00000000, int maxAddress = 0x7f000000)
+        {
+            List<int> l = new List<int>();
+            int address = minAddress;
+            byte[] data = Convertation.GetBytes(scanObject);
+            MEMORY_BASIC_INFORMATION _BASIC_INFORMATION;
+            _BASIC_INFORMATION.RegionSize = IntPtr.Zero;
+            _BASIC_INFORMATION.RegionSize = IntPtr.Zero;
+            while (address <= maxAddress)
+            {
+                VirtualQueryEx(handle, (IntPtr)address, out _BASIC_INFORMATION, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+                if (address != (uint)_BASIC_INFORMATION.BaseAddress + (uint)_BASIC_INFORMATION.RegionSize)
+                {
+                    byte[] buffer = new byte[(uint)_BASIC_INFORMATION.RegionSize];
+                    int Dammy = 0;
+                    ReadProcessMemory(handle, (IntPtr)_BASIC_INFORMATION.BaseAddress, buffer, (int)_BASIC_INFORMATION.RegionSize, out Dammy);
+                    for (int i = 0; i < buffer.Length - data.Length; i++)
+                    {
+                        if (buffer[i] == data[0])
+                        {
+                            if (buffer[i + 1] == data[1])
+                            {
+                                if (buffer[i + 2] == data[2])
+                                {
+                                    if (buffer[i + 3] == data[3])
+                                    {
+                                        if (buffer[i + 4] == data[4])
+                                        {
+                                            if (buffer[i + 5] == data[5])
+                                            {
+                                                if (buffer[i + 6] == data[6])
+                                                {
+                                                    if (buffer[i + 7] == data[7])
+                                                    {
+                                                        int MyAddress = (int)_BASIC_INFORMATION.BaseAddress + i;
+                                                        l.Add(MyAddress);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                address = (int)_BASIC_INFORMATION.BaseAddress + (int)_BASIC_INFORMATION.RegionSize;
+            }
+            return l;
+        }
+
+        public List<int> ReadFloats(float scanObject, int minAddress = 0x00000000, int maxAddress = 0x7f000000)
+        {
+            List<int> l = new List<int>();
+            int address = minAddress;
+            byte[] data = Convertation.GetBytes(scanObject);
+            MEMORY_BASIC_INFORMATION _BASIC_INFORMATION;
+            _BASIC_INFORMATION.RegionSize = IntPtr.Zero;
+            _BASIC_INFORMATION.RegionSize = IntPtr.Zero;
+            while (address <= maxAddress)
+            {
+                VirtualQueryEx(handle, (IntPtr)address, out _BASIC_INFORMATION, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+                if (address != (uint)_BASIC_INFORMATION.BaseAddress + (uint)_BASIC_INFORMATION.RegionSize)
+                {
+                    byte[] buffer = new byte[(uint)_BASIC_INFORMATION.RegionSize];
+                    int Dammy = 0;
+                    ReadProcessMemory(handle, (IntPtr)_BASIC_INFORMATION.BaseAddress, buffer, (int)_BASIC_INFORMATION.RegionSize, out Dammy);
+                    for (int i = 0; i < buffer.Length - data.Length; i++)
+                    {
+                        if (buffer[i] == data[0])
+                        {
+                            if (buffer[i + 1] == data[1])
+                            {
+                                if (buffer[i + 2] == data[2])
+                                {
+                                    if(buffer[i + 3] == data[3])
+                                    {
+                                        int MyAddress = (int)_BASIC_INFORMATION.BaseAddress + i;
+                                        l.Add(MyAddress);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                address = (int)_BASIC_INFORMATION.BaseAddress + (int)_BASIC_INFORMATION.RegionSize;
+            }
+            return l;
         }
 
         public int GetInt(byte[] data)
@@ -303,6 +469,11 @@ namespace ABSoftware
         public class Convertation
         {
             public static byte[] GetBytes(int value)
+            {
+                return BitConverter.GetBytes(value);
+            }
+
+            public static byte[] GetBytes(long value)
             {
                 return BitConverter.GetBytes(value);
             }
