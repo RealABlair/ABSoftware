@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TEMP.ABSoftware.NeuralNetwork
+namespace ABSoftware.NeuralNetwork
 {
     public class Network
     {
