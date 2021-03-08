@@ -94,6 +94,14 @@ namespace ABSoftware
                 handle = OpenProcess(p, ProcessAccessFlags.All);
             }
         }
+        
+        public Memory(int ProcessId)
+        {
+            if (p != null)
+            {
+                handle = OpenProcess(ProcessAccessFlags.All, false, ProcessId);
+            }
+        }
 
         public int ReadSignature(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x7f000000)
         {
