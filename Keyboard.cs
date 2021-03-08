@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine2D.Engine
+namespace ABSoftware
 {
     public class Keyboard
     {
