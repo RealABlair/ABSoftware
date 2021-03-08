@@ -99,7 +99,7 @@ namespace ABSoftware
         {
             if (p != null)
             {
-                handle = OpenProcess(ProcessAccessFlags.All, false, ProcessId);
+                handle = OpenProcess((uint)ProcessAccessFlags.All, false, ProcessId);
             }
         }
 
