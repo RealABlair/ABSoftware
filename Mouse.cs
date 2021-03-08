@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace Engine2D.Engine
+namespace ABSoftware
 {
     public class Mouse
     {
