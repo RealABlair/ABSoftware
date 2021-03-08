@@ -97,10 +97,8 @@ namespace ABSoftware
         
         public Memory(int ProcessId)
         {
-            if (p != null)
-            {
-                handle = OpenProcess((uint)ProcessAccessFlags.All, false, ProcessId);
-            }
+            process_name = Process.GetProcessById(ProcessId).ProcessName;
+            handle = OpenProcess((uint)ProcessAccessFlags.All, false, ProcessId);
         }
 
         public int ReadSignature(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x7f000000)
