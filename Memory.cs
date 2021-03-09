@@ -37,7 +37,7 @@ namespace ABSoftware
         static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer, int dwSize, out int lpNumberOfBytesRead);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer, int dwSize, out IntPtr lpNumberOfBytesRead);
+        static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer, int dwSize,  out IntPtr lpNumberOfBytesRead);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out, MarshalAs(UnmanagedType.AsAny)] object lpBuffer, int dwSize, out IntPtr lpNumberOfBytesRead);
@@ -94,12 +94,6 @@ namespace ABSoftware
                 handle = OpenProcess(p, ProcessAccessFlags.All);
             }
         }
-        
-        public Memory(int ProcessId)
-        {
-            process_name = Process.GetProcessById(ProcessId).ProcessName;
-            handle = OpenProcess((uint)ProcessAccessFlags.All, false, ProcessId);
-        }
 
         public int ReadSignature(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x7f000000)
         {
@@ -144,6 +138,52 @@ namespace ABSoftware
                 lpBuffer = null;
             }
             return 0;
+        }
+
+        public List<int> ReadSignatures(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x7f000000)
+        {
+            List<int> l = new List<int>();
+            MEMORY_BASIC_INFORMATION memory_basic_information;
+            memory_basic_information.BaseAddress = IntPtr.Zero;
+            memory_basic_information.RegionSize = IntPtr.Zero;
+            int num = 0;
+            int address = minAddress;
+            while (address < maxAddress)
+            {
+                VirtualQueryEx(handle, (IntPtr)address, out memory_basic_information, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+                if (address == (((long)memory_basic_information.BaseAddress) + ((long)memory_basic_information.RegionSize)))
+                {
+                    break;
+                }
+                address = (((int)memory_basic_information.BaseAddress) + ((int)memory_basic_information.RegionSize));
+                byte[] lpBuffer = new byte[(int)memory_basic_information.RegionSize];
+                int lpNumberOfBytesRead = 0;
+                ReadProcessMemory(handle, memory_basic_information.BaseAddress, lpBuffer, lpBuffer.Length, out lpNumberOfBytesRead);
+                for (int i = 0; i < (lpBuffer.Length - signature.Length); i++)
+                {
+                    if ((lpBuffer[i] == signature[0]) && (lpBuffer[i + 1] == signature[1]))
+                    {
+                        for (int j = 0; j < signature.Length; j++)
+                        {
+                            if ((lpBuffer[i + j] == signature[j]) || (mask[j] == '?'))
+                            {
+                                num++;
+                                if (num == signature.Length)
+                                {
+                                    int addr = ((int)memory_basic_information.BaseAddress) + i;
+                                    l.Add(addr);
+                                }
+                            }
+                            else
+                            {
+                                num = 0;
+                            }
+                        }
+                    }
+                }
+                lpBuffer = null;
+            }
+            return l;
         }
 
         public List<int> ReadInts(int scanObject, int minAddress = 0x00000000, int maxAddress = 0x7f000000)
@@ -311,7 +351,7 @@ namespace ABSoftware
                             {
                                 if (buffer[i + 2] == data[2])
                                 {
-                                    if (buffer[i + 3] == data[3])
+                                    if(buffer[i + 3] == data[3])
                                     {
                                         int MyAddress = (int)_BASIC_INFORMATION.BaseAddress + i;
                                         l.Add(MyAddress);
@@ -351,7 +391,7 @@ namespace ABSoftware
         public long GetAddress64(byte[] data)
         {
             string ret = "";
-            for (int i = data.Length - 1; i > -1; i--)
+            for(int i = data.Length - 1; i > -1; i--)
             {
                 ret += data[i].ToString("X2");
             }
@@ -400,7 +440,7 @@ namespace ABSoftware
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
             ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
-            for (int i = 0; i < offsets.Length; i++)
+            for(int i = 0; i < offsets.Length; i++)
             {
                 long addr = GetAddress64(buffer);
                 addr += offsets[i];
@@ -462,27 +502,6 @@ namespace ABSoftware
             int outIntPtr = 0; //I DON`T NEED IT
             ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
             return BitConverter.ToDouble(buffer, 0);
-        }
-
-        public string ReadString(long address, int maxChars)
-        {
-            byte[] buffer = new byte[maxChars];
-            IntPtr IpAddress = (IntPtr)address;
-            int outIntPtr = 0; //I DON`T NEED IT
-            ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
-            string ou = "";
-            for(int i = 0; i < buffer.Length - 1; i++)
-            {
-                if(buffer[i] == 0x00 && buffer[i + 1] == 0x00)
-                {
-                    break;
-                }
-                else
-                {
-                    ou += char.ConvertFromUtf32(buffer[i]);
-                }
-            }
-            return ou;
         }
 
         //WRITE MEMORY
