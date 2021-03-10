@@ -84,6 +84,7 @@ namespace ABSoftware
 
         public string process_name { get; private set; }
         IntPtr handle = IntPtr.Zero;
+        public List<ProcessModule> modules = new List<ProcessModule>();
 
         public Memory(string ProcessName)
         {
@@ -92,6 +93,26 @@ namespace ABSoftware
             if (p != null)
             {
                 handle = OpenProcess(p, ProcessAccessFlags.All);
+            }
+            modules.Add(p.MainModule);
+            foreach(ProcessModule m in p.Modules)
+            {
+                modules.Add(m);
+            }
+        }
+
+        public Memory(int ProcessId)
+        {
+            process_name = Process.GetProcessById(ProcessId).ProcessName;
+            Process p = Process.GetProcessById(ProcessId);
+            if (p != null)
+            {
+                handle = OpenProcess(p, ProcessAccessFlags.All);
+            }
+            modules.Add(p.MainModule);
+            foreach (ProcessModule m in p.Modules)
+            {
+                modules.Add(m);
             }
         }
 
@@ -448,6 +469,15 @@ namespace ABSoftware
                 ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
             }
             return IpAddress.ToInt64();
+        }
+
+        public byte[] ReadByteArray(long address, int length)
+        {
+            byte[] buffer = new byte[length];
+            IntPtr IpAddress = (IntPtr)address;
+            int outIntPtr = 0; //I DON`T NEED IT
+            ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
+            return buffer;
         }
 
         public int ReadByte(long address)
