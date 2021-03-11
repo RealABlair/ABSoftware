@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -62,6 +62,59 @@ namespace ABSoftware
             }
             KLIN += "#END";
             return KLIN;
+        }
+
+        public class Convertation
+        {
+            //CONVERT↓
+
+            public static string GetValue(string[] array)
+            {
+                string ret = "[\"";
+                for(int i = 0; i < array.Length; i++)
+                {
+                    if (i + 1 != array.Length && i + 1 < array.Length)
+                    {
+                        ret += $"{array[i]}\", \"";
+                    }
+                    else
+                    {
+                        ret += $"{array[i]}";
+                    }
+                }
+                ret += "\"]";
+                return ret;
+            }
+
+            public static string GetValue(int[] array)
+            {
+                string ret = "[";
+                for (int i = 0; i < array.Length; i++)
+                {
+                    if (i + 1 != array.Length && i + 1 < array.Length)
+                    {
+                        ret += $"{array[i]}, ";
+                    }
+                    else
+                    {
+                        ret += $"{array[i]}";
+                    }
+                }
+                ret += "]";
+                return ret;
+            }
+
+            //GET↓
+
+            public static string[] Get(string KLINArray)
+            {
+                List<string> array = new List<string>();
+                for (int i = 1; i < KLINArray.Split(new char[] { '\"', '\"' }, StringSplitOptions.RemoveEmptyEntries).Length; i += 2)
+                {
+                    array.Add(KLINArray.Split(new char[] { '\"', '\"' }, StringSplitOptions.RemoveEmptyEntries)[i]);
+                }
+                return array.ToArray();
+            }
         }
     }
 }
