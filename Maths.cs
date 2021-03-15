@@ -8,6 +8,34 @@ namespace ABSoftware
 {
     public class Maths
     {
+        public static int PowerNumber(int num, int power)
+        {
+            for(int i = 1; i < power; i++)
+            {
+                num *= num;
+            }
+            return num;
+        }
+
+        public static float PowerNumber(float num, int power)
+        {
+            for (int i = 1; i < power; i++)
+            {
+                num *= num;
+            }
+            return num;
+        }
+
+        public static double DegreesToRadians(double degrees)
+        {
+            return degrees / 180 * Math.PI;
+        }
+
+        public static double RadiansToDegrees(double radians)
+        {
+            return radians / Math.PI * 180;
+        }
+        
         public static float Lerp(float start, float end, float t)
         {
             return start * (1 - t) + end * t;
