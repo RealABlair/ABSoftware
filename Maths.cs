@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +10,7 @@ namespace ABSoftware
     {
         public static int PowerNumber(int num, int power)
         {
-            for(int i = 1; i < power; i++)
+            for (int i = 1; i < power; i++)
             {
                 num *= num;
             }
@@ -35,7 +35,7 @@ namespace ABSoftware
         {
             return radians / Math.PI * 180;
         }
-        
+
         public static float Lerp(float start, float end, float t)
         {
             return start * (1 - t) + end * t;
