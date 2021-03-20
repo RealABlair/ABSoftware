@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -8,15 +8,52 @@ using System.Windows.Input;
 
 namespace ABSoftware
 {
-    public class Mouse
+    public abstract class Mouse
     {
         [DllImport("user32.dll")]
         static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, UIntPtr dwExtraInfo);
 
-        public static void Event(uint Flag, int x, int y, uint data, UIntPtr ExtraInfo)
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetCursorPos(out Position lpPoint);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Position
         {
-            
+            public int x;
+            public int y;
+
+            public Position(int x, int y)
+            {
+                this.x = x;
+                this.y = y;
+            }
         }
+
+        public bool LMBPressed = false;
+
+        public bool lmb { get { return LMBPressed; } set { LMBSet(value); } }
+
+
+        void LMBSet(bool v)
+        {
+            if (v == LMBPressed)
+                return;
+
+            if(v)
+            {
+                OnKeyDownL();
+            }
+            else
+            {
+                OnKeyUpL();
+            }
+
+            LMBPressed = v;
+        }
+
+        public abstract void OnKeyUpL();
+        public abstract void OnKeyDownL();
 
         public struct Flags
         {
