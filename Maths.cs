@@ -14,10 +14,11 @@ namespace ABSoftware
             double lastDiv = number;
             while((int)lastDiv != 0)
             {
-                double div = number / 16;
-                double rem = div - (int)div;
+                double div = lastDiv / 16;
+                double rem = lastDiv % 16;
                 int result = (int)div;
-                hex += HEX_CHARS((int)(rem * 16));
+                lastDiv = result;
+                hex += HEX_CHARS((int)(rem));
             }
             char[] array = hex.ToCharArray();
             Array.Reverse(array);
@@ -27,17 +28,21 @@ namespace ABSoftware
         public static int ToInt(string hex)
         {
             char[] array = hex.ToCharArray();
+            Array.Reverse(array);
             int sum = 0;
             for(int i = 0; i < array.Length; i++)
             {
                 int byt = INT_FROM_HEX(array[i]);
-                sum += sum * PowerNumber(sum, i);
+                sum += byt * PowerNumber(16, i);
+                Console.WriteLine(byt);
             }
             return sum;
         }
 
         public static int PowerNumber(int num, int power)
         {
+            if (power == 0)
+                return 1;
             for (int i = 1; i < power; i++)
             {
                 num *= num;
@@ -47,6 +52,8 @@ namespace ABSoftware
 
         public static float PowerNumber(float num, int power)
         {
+            if (power == 0)
+                return 1f;
             for (int i = 1; i < power; i++)
             {
                 num *= num;
