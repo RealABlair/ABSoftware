@@ -12,7 +12,24 @@ namespace ABSoftware
         {
             string hex = "";
             double lastDiv = number;
-            while((int)lastDiv != 0)
+            while ((int)lastDiv != 0)
+            {
+                double div = lastDiv / 16;
+                double rem = lastDiv % 16;
+                int result = (int)div;
+                lastDiv = result;
+                hex += HEX_CHARS((int)(rem));
+            }
+            char[] array = hex.ToCharArray();
+            Array.Reverse(array);
+            return new string(array);
+        }
+
+        public static string ToHex(long number)
+        {
+            string hex = "";
+            double lastDiv = number;
+            while ((int)lastDiv != 0)
             {
                 double div = lastDiv / 16;
                 double rem = lastDiv % 16;
@@ -30,11 +47,23 @@ namespace ABSoftware
             char[] array = hex.ToCharArray();
             Array.Reverse(array);
             int sum = 0;
-            for(int i = 0; i < array.Length; i++)
+            for (int i = 0; i < array.Length; i++)
             {
                 int byt = INT_FROM_HEX(array[i]);
                 sum += byt * PowerNumber(16, i);
-                Console.WriteLine(byt);
+            }
+            return sum;
+        }
+
+        public static long ToLong(string hex)
+        {
+            char[] array = hex.ToCharArray();
+            Array.Reverse(array);
+            long sum = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                int byt = INT_FROM_HEX(array[i]);
+                sum += byt * PowerNumber(16, i);
             }
             return sum;
         }
@@ -88,7 +117,7 @@ namespace ABSoftware
 
         private static char HEX_CHARS(int integer)
         {
-            switch(integer)
+            switch (integer)
             {
                 case 0:
                     return '0';
