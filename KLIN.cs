@@ -127,7 +127,7 @@ namespace ABSoftware
                 }
                 else
                 {
-                    for(int i = 0; i < count; i++)
+                    for(int i = 0; i < count - 1; i++)
                     {
                         array.Add(int.Parse(splits.Split(',')[i]));
                     }
