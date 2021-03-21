@@ -106,12 +106,31 @@ namespace ABSoftware
 
             //GET↓
 
-            public static string[] Get(string KLINArray)
+            public static string[] GetStrings(string KLINArray)
             {
                 List<string> array = new List<string>();
                 for (int i = 1; i < KLINArray.Split(new char[] { '\"', '\"' }, StringSplitOptions.RemoveEmptyEntries).Length; i += 2)
                 {
                     array.Add(KLINArray.Split(new char[] { '\"', '\"' }, StringSplitOptions.RemoveEmptyEntries)[i]);
+                }
+                return array.ToArray();
+            }
+
+            public static int[] GetInts(string KLINArray)
+            {
+                List<int> array = new List<int>();
+                int count = KLINArray.Split(',').Length + 1;
+                string splits = KLINArray.Split(new char[] { '[', ']' })[1];
+                if(count == 1)
+                {
+                    array.Add(int.Parse(KLINArray.Split(new char[] { '[', ']' })[1]));
+                }
+                else
+                {
+                    for(int i = 0; i < count; i++)
+                    {
+                        array.Add(int.Parse(splits.Split(',')[i]));
+                    }
                 }
                 return array.ToArray();
             }
