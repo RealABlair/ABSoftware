@@ -104,6 +104,11 @@ namespace ABSoftware
         {
             return start * (1 - t) + end * t;
         }
+        
+        public static float InvLerp(float start, float end, float val)
+        {
+            return (val / start) / (end - start);
+        }
 
         public class Random
         {
