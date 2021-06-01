@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,12 +18,43 @@ namespace ABSoftware.ServerSDK.ServerSideClient
         public TcpClient client;
         public Ping ping = new Ping();
 
+        byte[] buffer = new byte[Server.instance.ClientBufferSize];
+        Thread packetListener = null;
+        bool listeningPackets = false;
 
         public void sendPacket(byte[] buffer) => client.GetStream().Write(buffer, 0, buffer.Length);
 
         public void Start()
         {
-            
+            packetListener = new Thread(PacketBuffer);
+            packetListener.Start();
+        }
+
+        void PacketBuffer()
+        {
+            try
+            {
+                listeningPackets = true;
+                while (listeningPackets)
+                {
+                    int count = client.GetStream().Read(buffer, 0, buffer.Length);
+                    if (count < 1)
+                    {
+                        Server.instance.DisconnectClient(ID);
+                    }
+                    else
+                    {
+                        ping.Update();
+                        byte[] bytes = buffer;
+                        Array.Resize(ref bytes, count);
+                        Server.instance.OnIncomingPacket(this, Encoding.UTF8.GetString(bytes));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Server.instance.DisconnectClient(ID);
+            }
         }
 
         public void Disconnect()
