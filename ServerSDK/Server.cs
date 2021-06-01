@@ -32,7 +32,7 @@ namespace ABSoftware.ServerSDK
 
         public string ServerName { set { Console.Title = value; } }
 
-        public void StartNetwork(int port, int ClientBufferSize)
+        public void StartNetwork(int port, int ClientBufferSize = 1024)
         {
             instance = this;
             Init();
