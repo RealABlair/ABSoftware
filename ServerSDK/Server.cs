@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,26 +24,26 @@ namespace ABSoftware.ServerSDK
         TcpListener tcpListener;
         Thread serverLoopThread;
         Thread consoleInputListener;
-        Thread packetListener;
         bool isRunning = false;
         
         public int Port = -1;
+        public int ClientBufferSize;
+
 
         public string ServerName { set { Console.Title = value; } }
 
-        public void StartNetwork(int port)
+        public void StartNetwork(int port, int ClientBufferSize)
         {
             instance = this;
             Init();
             ServerName = $"'{GetType().Name}' - Server is supported by ABlair";
             this.Port = port;
+            this.ClientBufferSize = ClientBufferSize;
             isRunning = true;
             consoleInputListener = new Thread(ConsoleListenLoop);
             consoleInputListener.Start();
             serverLoopThread = new Thread(ServerLoop);
             serverLoopThread.Start();
-            packetListener = new Thread(PacketListener);
-            packetListener.Start();
         }
 
         public void StopNetwork()
@@ -54,36 +54,7 @@ namespace ABSoftware.ServerSDK
             isRunning = false;
         }
 
-        void PacketListener()
-        {
-            while (isRunning)
-            {
-                foreach (Client client in clients)
-                {
-                    if (client == null)
-                        continue;
-                    int countAvailable = client.client.Available;
-                    if (countAvailable > 0)
-                    {
-                        byte[] buffer = new byte[countAvailable];
-                        int count = client.client.GetStream().Read(buffer, 0, buffer.Length);
-                        if (count < 1)
-                        {
-                            DisconnectClient(client.ID);
-                        }
-                        else
-                        {
-                            client.ping.Update();
-                            byte[] bytes = buffer;
-                            Array.Resize(ref bytes, count);
-                            OnIncomingPacket(client, Encoding.UTF8.GetString(bytes));
-                        }
-                    }
-                }
-                Thread.Sleep(1);
-            }
-        }
-
+        
         void ServerLoop()
         {
             OnServerStart();
@@ -180,6 +151,11 @@ namespace ABSoftware.ServerSDK
                 c.sendPacket(Encoding.UTF8.GetBytes(packet));
                 OnOutgoingPacket(c, packet);
             }
+        }
+
+        public Client[] GetClients()
+        {
+            return clients.ToArray();
         }
 
         public virtual void OnServerStart() { }
