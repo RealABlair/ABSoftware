@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -32,22 +32,22 @@ namespace ABSoftware
          *      AsyncWork.StopWorker("printer");
          *  }
         */
-        public static void StartNewAW(AsyncWorker worker, string name, params object[] args)
+        public static void StartNewAW(AsyncWorker worker, string name, object classObject, params object[] args)
         {
-            StartNew(worker, name, args);
+            StartNew(worker, name, classObject, args);
         }
 
-        static void StartNew(Delegate method, string name, params object[] args)
+        static void StartNew(Delegate method, string name, object classObject, params object[] args)
         {
             if (NewWorker(name))
             {
-                Worker w = new Worker(args, method, name);
+                Worker w = new Worker(args, method, name, classObject);
                 workers.Add(w);
             }
             else
             {
                 StopWorker(name);
-                Worker w = new Worker(args, method, name);
+                Worker w = new Worker(args, method, name, classObject);
                 workers.Add(w);
             }
         }
@@ -74,9 +74,9 @@ namespace ABSoftware
 
         private static void AsWorkLoop()
         {
-            while(true)
+            while (true)
             {
-                if(workers.Count > 0 && workers != null)
+                if (workers.Count > 0 && workers != null)
                 {
                     foreach (Worker w in workers.ToList())
                     {
@@ -92,12 +92,14 @@ namespace ABSoftware
             public object[] args;
             public Delegate method;
             public string name;
+            public object classObject;
 
-            public Worker(object[] args, Delegate method, string name)
+            public Worker(object[] args, Delegate method, string name, object classObject)
             {
                 this.args = args;
                 this.method = method;
                 this.name = name;
+                this.classObject = classObject;
             }
         }
     }
