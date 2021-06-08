@@ -201,6 +201,11 @@ namespace ABSoftware
             }
         }
 
+        public IntPtr getHandle()
+        {
+            return handle;
+        }
+
         public int ReadSignature(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x7f000000)
         {
             MEMORY_BASIC_INFORMATION memory_basic_information;
@@ -556,75 +561,110 @@ namespace ABSoftware
             return IpAddress.ToInt64();
         }
 
-        public byte[] ReadByteArray(long address, int length)
+        public bool ReadByteArray(long address, int length, out byte[] value)
         {
             byte[] buffer = new byte[length];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
-            return buffer;
+            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            {
+                value = buffer;
+                return true;
+            }
+            value = null;
+            return true;
         }
 
-        public int ReadByte(long address)
+        public bool ReadByte(long address, out byte value)
         {
             byte[] buffer = new byte[(int)BufferType.Byte];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
-            return GetInt(buffer);
+            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            {
+                value = (byte)GetInt(buffer);
+                return true;
+            }
+            value = 0;
+            return false;
         }
 
-        public int ReadByte2(long address)
+        public bool ReadByte2(long address, out short value)
         {
             byte[] buffer = new byte[(int)BufferType.Byte2];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
-            return GetInt(buffer);
+            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            {
+                value = (short)GetInt(buffer);
+                return true;
+            }
+            value = 0;
+            return false;
         }
 
-        public int ReadByte4(long address)
+        public bool ReadByte4(long address, out int value)
         {
             byte[] buffer = new byte[(int)BufferType.Byte4];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
-            return GetInt(buffer);
+            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            {
+                value = GetInt(buffer);
+                return true;
+            }
+            value = 0;
+            return false;
         }
 
-        public long ReadByte8(long address)
+        public bool ReadByte8(long address, out long value)
         {
             byte[] buffer = new byte[(int)BufferType.Byte8];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
-            return GetLong(buffer);
+            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            {
+                value = GetLong(buffer);
+                return true;
+            }
+            value = 0;
+            return false;
         }
 
-        public float ReadFloat(long address)
+        public bool ReadFloat(long address, out float value)
         {
             byte[] buffer = new byte[(int)BufferType.Float];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
-            return BitConverter.ToSingle(buffer, 0);
+            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            {
+                value = BitConverter.ToSingle(buffer, 0);
+                return true;
+            }
+            value = 0f;
+            return false;
         }
 
-        public double ReadDouble(long address)
+        public bool ReadDouble(long address, out double value)
         {
             byte[] buffer = new byte[(int)BufferType.Double];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
-            return BitConverter.ToDouble(buffer, 0);
+            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            {
+                value = BitConverter.ToDouble(buffer, 0);
+                return true;
+            }
+            value = 0;
+            return false;
         }
 
         //WRITE MEMORY
-        public void Write(long address, byte[] bytes)
+        public bool Write(long address, byte[] bytes)
         {
             IntPtr IpAddress = (IntPtr)address;
             IntPtr outTrash = IntPtr.Zero;
-            WriteProcessMemory(handle, IpAddress, bytes, bytes.Length, out outTrash);
+            return WriteProcessMemory(handle, IpAddress, bytes, bytes.Length, out outTrash);
         }
 
         public bool InjectDll(string dllPath)
