@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace ABSoftware
 {
@@ -28,16 +29,97 @@ namespace ABSoftware
             public uint Protect;
             public uint Type;
         }
+
+        [Flags]
+        public enum FreeType : uint
+        {
+            // Token: 0x040001D8 RID: 472
+            Decommit = 16384U,
+            // Token: 0x040001D9 RID: 473
+            Release = 32768U
+        }
+
+        [Flags]
+        public enum AllocationType : uint
+        {
+            // Token: 0x040001C2 RID: 450
+            Commit = 4096U,
+            // Token: 0x040001C3 RID: 451
+            Reserve = 8192U,
+            // Token: 0x040001C4 RID: 452
+            Decommit = 16384U,
+            // Token: 0x040001C5 RID: 453
+            Release = 32768U,
+            // Token: 0x040001C6 RID: 454
+            Reset = 524288U,
+            // Token: 0x040001C7 RID: 455
+            Physical = 4194304U,
+            // Token: 0x040001C8 RID: 456
+            TopDown = 1048576U,
+            // Token: 0x040001C9 RID: 457
+            WriteWatch = 2097152U,
+            // Token: 0x040001CA RID: 458
+            LargePages = 536870912U
+        }
+
+        [Flags]
+        public enum MemoryProtection : uint
+        {
+            // Token: 0x040001CC RID: 460
+            Execute = 16U,
+            // Token: 0x040001CD RID: 461
+            ExecuteRead = 32U,
+            // Token: 0x040001CE RID: 462
+            ExecuteReadWrite = 64U,
+            // Token: 0x040001CF RID: 463
+            ExecuteWriteCopy = 128U,
+            // Token: 0x040001D0 RID: 464
+            NoAccess = 1U,
+            // Token: 0x040001D1 RID: 465
+            ReadOnly = 2U,
+            // Token: 0x040001D2 RID: 466
+            ReadWrite = 4U,
+            // Token: 0x040001D3 RID: 467
+            WriteCopy = 8U,
+            // Token: 0x040001D4 RID: 468
+            GuardModifierflag = 256U,
+            // Token: 0x040001D5 RID: 469
+            NoCacheModifierflag = 512U,
+            // Token: 0x040001D6 RID: 470
+            WriteCombineModifierflag = 1024U
+        }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CloseHandle(IntPtr hObject);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
+        public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern IntPtr CreateRemoteThread(IntPtr hProcess, IntPtr lpThreadAttributes, uint dwStackSize, IntPtr lpStartAddress, IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);
+
         // VirtualQueryEx
         [DllImport("kernel32.dll")]
         static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength);
+
+        // VirtualFreeEx
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        static extern bool VirtualFreeEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, FreeType dwFreeType);
+
+        // VirtualAllocEx
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        public static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
 
         #region READ_PROC_MEM
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer, int dwSize, out int lpNumberOfBytesRead);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer, int dwSize,  out IntPtr lpNumberOfBytesRead);
+        static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out] byte[] lpBuffer, int dwSize, out IntPtr lpNumberOfBytesRead);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [Out, MarshalAs(UnmanagedType.AsAny)] object lpBuffer, int dwSize, out IntPtr lpNumberOfBytesRead);
@@ -48,10 +130,10 @@ namespace ABSoftware
 
         #region WRITE_PROC_MEM
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, Int32 nSize, out IntPtr lpNumberOfBytesWritten);
+        static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, Int32 nSize, out IntPtr lpNumberOfBytesWritten);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [MarshalAs(UnmanagedType.AsAny)] object lpBuffer, int dwSize, out IntPtr lpNumberOfBytesWritten);
+        static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, [MarshalAs(UnmanagedType.AsAny)] object lpBuffer, int dwSize, out IntPtr lpNumberOfBytesWritten);
         #endregion
 
         [Flags]
@@ -83,6 +165,7 @@ namespace ABSoftware
         }
 
         public string process_name { get; private set; }
+        public int process_id { get; private set; }
         IntPtr handle = IntPtr.Zero;
         public List<ProcessModule> modules = new List<ProcessModule>();
 
@@ -92,10 +175,11 @@ namespace ABSoftware
             Process p = Process.GetProcessesByName(ProcessName)[0];
             if (p != null)
             {
+                process_id = p.Id;
                 handle = OpenProcess(p, ProcessAccessFlags.All);
             }
             modules.Add(p.MainModule);
-            foreach(ProcessModule m in p.Modules)
+            foreach (ProcessModule m in p.Modules)
             {
                 modules.Add(m);
             }
@@ -107,6 +191,7 @@ namespace ABSoftware
             Process p = Process.GetProcessById(ProcessId);
             if (p != null)
             {
+                process_id = p.Id;
                 handle = OpenProcess(p, ProcessAccessFlags.All);
             }
             modules.Add(p.MainModule);
@@ -372,7 +457,7 @@ namespace ABSoftware
                             {
                                 if (buffer[i + 2] == data[2])
                                 {
-                                    if(buffer[i + 3] == data[3])
+                                    if (buffer[i + 3] == data[3])
                                     {
                                         int MyAddress = (int)_BASIC_INFORMATION.BaseAddress + i;
                                         l.Add(MyAddress);
@@ -412,7 +497,7 @@ namespace ABSoftware
         public long GetAddress64(byte[] data)
         {
             string ret = "";
-            for(int i = data.Length - 1; i > -1; i--)
+            for (int i = data.Length - 1; i > -1; i--)
             {
                 ret += data[i].ToString("X2");
             }
@@ -461,7 +546,7 @@ namespace ABSoftware
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
             ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
-            for(int i = 0; i < offsets.Length; i++)
+            for (int i = 0; i < offsets.Length; i++)
             {
                 long addr = GetAddress64(buffer);
                 addr += offsets[i];
@@ -540,6 +625,39 @@ namespace ABSoftware
             IntPtr IpAddress = (IntPtr)address;
             IntPtr outTrash = IntPtr.Zero;
             WriteProcessMemory(handle, IpAddress, bytes, bytes.Length, out outTrash);
+        }
+
+        public bool InjectDll(string dllPath)
+        {
+            uint dwSize = (uint)((dllPath.Length + 1) * Marshal.SizeOf(typeof(char)));
+            IntPtr hndl = OpenProcess((uint)(ProcessAccessFlags.CreateThread | ProcessAccessFlags.VirtualMemoryOperation | ProcessAccessFlags.VirtualMemoryRead | ProcessAccessFlags.VirtualMemoryWrite | ProcessAccessFlags.QueryInformation), false, process_id);
+            IntPtr procAddress = GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA");
+            if (procAddress == null)
+            {
+                return false;
+            }
+            IntPtr intptr = VirtualAllocEx(hndl, IntPtr.Zero, dwSize, AllocationType.Commit | AllocationType.Reserve, MemoryProtection.ReadWrite);
+            if (intptr == null)
+            {
+                return false;
+            }
+            Thread.Sleep(500);
+            byte[] dllPathBytes = Encoding.UTF8.GetBytes(dllPath);
+            IntPtr intptr1;
+            if(!WriteProcessMemory(hndl, intptr, dllPathBytes, (int)dwSize, out intptr1) || intptr1.ToInt32() != dllPathBytes.Length + 1)
+            {
+                return false;
+            }
+            if(CreateRemoteThread(hndl, IntPtr.Zero, 0U, procAddress, intptr, 0U, IntPtr.Zero) == IntPtr.Zero)
+            {
+                return false;
+            }
+            if(!CloseHandle(hndl))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public class Convertation
