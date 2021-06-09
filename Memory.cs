@@ -169,7 +169,8 @@ namespace ABSoftware
         IntPtr handle = IntPtr.Zero;
         public List<ProcessModule> modules = new List<ProcessModule>();
 
-        public Memory(string ProcessName)
+
+        public bool Attach(string ProcessName)
         {
             process_name = ProcessName;
             Process p = Process.GetProcessesByName(ProcessName)[0];
@@ -178,14 +179,19 @@ namespace ABSoftware
                 process_id = p.Id;
                 handle = OpenProcess(p, ProcessAccessFlags.All);
             }
+            else
+            {
+                return false;
+            }
             modules.Add(p.MainModule);
             foreach (ProcessModule m in p.Modules)
             {
                 modules.Add(m);
             }
+            return true;
         }
 
-        public Memory(int ProcessId)
+        public bool Attach(int ProcessId)
         {
             process_name = Process.GetProcessById(ProcessId).ProcessName;
             Process p = Process.GetProcessById(ProcessId);
@@ -194,11 +200,16 @@ namespace ABSoftware
                 process_id = p.Id;
                 handle = OpenProcess(p, ProcessAccessFlags.All);
             }
+            else
+            {
+                return false;
+            }
             modules.Add(p.MainModule);
             foreach (ProcessModule m in p.Modules)
             {
                 modules.Add(m);
             }
+            return true;
         }
 
         public IntPtr getHandle()
@@ -566,7 +577,7 @@ namespace ABSoftware
             byte[] buffer = new byte[length];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            if (ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
             {
                 value = buffer;
                 return true;
@@ -580,7 +591,7 @@ namespace ABSoftware
             byte[] buffer = new byte[(int)BufferType.Byte];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            if (ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
             {
                 value = (byte)GetInt(buffer);
                 return true;
@@ -594,7 +605,7 @@ namespace ABSoftware
             byte[] buffer = new byte[(int)BufferType.Byte2];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            if (ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
             {
                 value = (short)GetInt(buffer);
                 return true;
@@ -608,7 +619,7 @@ namespace ABSoftware
             byte[] buffer = new byte[(int)BufferType.Byte4];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            if (ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
             {
                 value = GetInt(buffer);
                 return true;
@@ -622,7 +633,7 @@ namespace ABSoftware
             byte[] buffer = new byte[(int)BufferType.Byte8];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            if (ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
             {
                 value = GetLong(buffer);
                 return true;
@@ -636,7 +647,7 @@ namespace ABSoftware
             byte[] buffer = new byte[(int)BufferType.Float];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            if (ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
             {
                 value = BitConverter.ToSingle(buffer, 0);
                 return true;
@@ -650,7 +661,7 @@ namespace ABSoftware
             byte[] buffer = new byte[(int)BufferType.Double];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
-            if(ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
+            if (ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr))
             {
                 value = BitConverter.ToDouble(buffer, 0);
                 return true;
@@ -684,15 +695,15 @@ namespace ABSoftware
             Thread.Sleep(500);
             byte[] dllPathBytes = Encoding.UTF8.GetBytes(dllPath);
             IntPtr intptr1;
-            if(!WriteProcessMemory(hndl, intptr, dllPathBytes, (int)dwSize, out intptr1) || intptr1.ToInt32() != dllPathBytes.Length + 1)
+            if (!WriteProcessMemory(hndl, intptr, dllPathBytes, (int)dwSize, out intptr1) || intptr1.ToInt32() != dllPathBytes.Length + 1)
             {
                 return false;
             }
-            if(CreateRemoteThread(hndl, IntPtr.Zero, 0U, procAddress, intptr, 0U, IntPtr.Zero) == IntPtr.Zero)
+            if (CreateRemoteThread(hndl, IntPtr.Zero, 0U, procAddress, intptr, 0U, IntPtr.Zero) == IntPtr.Zero)
             {
                 return false;
             }
-            if(!CloseHandle(hndl))
+            if (!CloseHandle(hndl))
             {
                 return false;
             }
