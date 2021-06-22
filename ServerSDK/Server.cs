@@ -48,10 +48,13 @@ namespace ABSoftware.ServerSDK
 
         public void StopNetwork()
         {
+            isRunning = false;
+            clients.Clear();
             Port = -1;
             serverLoopThread.Join(200);
             serverLoopThread = null;
-            isRunning = false;
+            tcpListener.Stop();
+            tcpListener = null;
             OnServerStop();
         }
 
@@ -63,21 +66,24 @@ namespace ABSoftware.ServerSDK
             tcpListener.Start();
             while(isRunning)
             {
-                TcpClient tcp = tcpListener.AcceptTcpClient();
-                IPEndPoint iep = (IPEndPoint)tcp.Client.RemoteEndPoint;
-                Client client = new Client();
-                client.ID = randomId();
-                client.IP = iep.ToString().Split(':')[0];
-                client.client = tcp;
-                client.Start();
-                clients.Add(client);
-                OnClientConnect(client);
+                if (tcpListener.Pending())
+                {
+                    TcpClient tcp = tcpListener.AcceptTcpClient();
+                    IPEndPoint iep = (IPEndPoint)tcp.Client.RemoteEndPoint;
+                    Client client = new Client();
+                    client.ID = randomId();
+                    client.IP = iep.ToString().Split(':')[0];
+                    client.client = tcp;
+                    client.Start();
+                    clients.Add(client);
+                    OnClientConnect(client);
+                }
             }
         }
 
         void ConsoleListenLoop()
         {
-            while(isRunning)
+            while(true)
             {
                 string line = Console.ReadLine();
                 OnConsoleInput(line);
