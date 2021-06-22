@@ -52,6 +52,7 @@ namespace ABSoftware.ServerSDK
             serverLoopThread.Join(200);
             serverLoopThread = null;
             isRunning = false;
+            OnServerStop();
         }
 
         
