@@ -64,6 +64,12 @@ namespace ABSoftware
             return KLIN;
         }
 
+        public void Dispose()
+        {
+            KLCODE = "";
+            tokens.Clear();
+        }
+
         public class Convertation
         {
             //CONVERT↓
