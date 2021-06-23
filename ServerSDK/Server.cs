@@ -49,6 +49,7 @@ namespace ABSoftware.ServerSDK
         public void StopNetwork()
         {
             isRunning = false;
+            DisconnectClients();
             clients.Clear();
             Port = -1;
             serverLoopThread.Join(200);
@@ -130,7 +131,7 @@ namespace ABSoftware.ServerSDK
 
         public void DisconnectClients()
         {
-            foreach(Client c in clients)
+            foreach(Client c in clients.ToArray())
             {
                 if (c == null)
                     continue;
