@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Hasher.ABSoftware
+namespace ABSoftware
 {
     public class Cryptography
     {
