@@ -8,7 +8,20 @@ namespace ABSoftware
 {
     public class Cryptography
     {
-        public static string Hash(string text)
+        public static string Hash32(string text)
+        {
+            uint hash = 0;
+            for (var i = 0; i < text.Length; i++)
+            {
+                hash += (uint)(text[i] + 1) * (uint)(Math.Sqrt(hash) + 9);
+            }
+            hash += (uint)text.Length;
+            if (hash < uint.MaxValue / 10)
+                hash *= hash / (uint)text.Length;
+            return hash.ToString("X8");
+        }
+
+        public static string Hash64(string text)
         {
             ulong hash = 0;
             for (var i = 0; i < text.Length; i++)
