@@ -17,8 +17,7 @@ namespace ABSoftware.SafeVariables
         
         public void OnDetect()
         {
-            Console.WriteLine("Detected Cheat!");
-            Application.Exit();
+            
         }
 
         public virtual void OnSet(object value)
