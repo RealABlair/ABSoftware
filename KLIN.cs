@@ -53,6 +53,16 @@ namespace ABSoftware
             return null;
         }
 
+        public string[] GetProperties()
+        {
+            List<string> s = new List<string>();
+            foreach(KLINToken t in tokens)
+            {
+                s.Add(t.Property);
+            }
+            return s.ToArray();
+        }
+        
         public override string ToString()
         {
             string KLIN = $"#KLIN version {v}\n";
