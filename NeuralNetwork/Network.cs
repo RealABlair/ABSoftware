@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 
-public class Network : IComparable<NeuralNetwork>
+public class Network
 {
     private int[] layers;//layers
     private float[][] neurons;//neurons
