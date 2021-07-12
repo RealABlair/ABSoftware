@@ -42,7 +42,7 @@ public class Network
             float[] bias = new float[layers[i]];
             for (int j = 0; j < layers[i]; j++)
             {
-                bias[j] = UnityEngine.Random.Range(-0.5f, 0.5f);
+                bias[j] = Maths.Random.Range(-0.5f, 0.5f);
             }
             biasList.Add(bias);
         }
@@ -62,7 +62,7 @@ public class Network
                 for (int k = 0; k < neuronsInPreviousLayer; k++)
                 {
                     //float sd = 1f / ((neurons[i].Length + neuronsInPreviousLayer) / 2f);
-                    neuronWeights[k] = UnityEngine.Random.Range(-0.5f, 0.5f);
+                    neuronWeights[k] = Maths.Random.Range(-0.5f, 0.5f);
                 }
                 layerWeightsList.Add(neuronWeights);
             }
@@ -104,7 +104,7 @@ public class Network
         {
             for (int j = 0; j < biases[i].Length; j++)
             {
-                biases[i][j] = (UnityEngine.Random.Range(0f, chance) <= 5) ? biases[i][j] += UnityEngine.Random.Range(-val, val) : biases[i][j];
+                biases[i][j] = (Maths.Random.Range(0f, chance) <= 5) ? biases[i][j] += Maths.Random.Range(-val, val) : biases[i][j];
             }
         }
 
@@ -114,7 +114,7 @@ public class Network
             {
                 for (int k = 0; k < weights[i][j].Length; k++)
                 {
-                    weights[i][j][k] = (UnityEngine.Random.Range(0f, chance) <= 5) ? weights[i][j][k] += UnityEngine.Random.Range(-val, val) : weights[i][j][k];
+                    weights[i][j][k] = (Maths.Random.Range(0f, chance) <= 5) ? weights[i][j][k] += Maths.Random.Range(-val, val) : weights[i][j][k];
                 }
             }
         }
