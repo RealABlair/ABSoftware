@@ -173,7 +173,10 @@ namespace ABSoftware
         public bool Attach(string ProcessName)
         {
             process_name = ProcessName;
-            Process p = Process.GetProcessesByName(ProcessName)[0];
+            Process[] processes = Process.GetProcessesByName(ProcessName);
+            if (processes.Length < 1)
+                return false;
+            Process p = processes[0];
             if (p != null)
             {
                 process_id = p.Id;
@@ -193,10 +196,10 @@ namespace ABSoftware
 
         public bool Attach(int ProcessId)
         {
-            process_name = Process.GetProcessById(ProcessId).ProcessName;
             Process p = Process.GetProcessById(ProcessId);
             if (p != null)
             {
+                process_name = p.ProcessName;
                 process_id = p.Id;
                 handle = OpenProcess(p, ProcessAccessFlags.All);
             }
@@ -542,7 +545,7 @@ namespace ABSoftware
 
         public int OffsetAddress(int address, int[] offsets)
         {
-            byte[] buffer = new byte[(int)BufferType.Byte8];
+            byte[] buffer = new byte[(int)BufferType.Byte4];
             IntPtr IpAddress = (IntPtr)address;
             int outIntPtr = 0; //I DON`T NEED IT
             ReadProcessMemory(handle, IpAddress, buffer, buffer.Length, out outIntPtr);
