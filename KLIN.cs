@@ -55,12 +55,12 @@ namespace ABSoftware
 
         public string[] GetProperties()
         {
-            List<string> s = new List<string>();
-            foreach(KLINToken t in tokens)
+            string[] s = new string[tokens.Count];
+            for(int i = 0; i < s.Length; i++)
             {
-                s.Add(t.Property);
+                s[i] = tokens[i].Property;
             }
-            return s.ToArray();
+            return s;
         }
         
         public override string ToString()
