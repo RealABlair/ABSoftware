@@ -33,59 +33,37 @@ namespace ABSoftware
         [Flags]
         public enum FreeType : uint
         {
-            // Token: 0x040001D8 RID: 472
             Decommit = 16384U,
-            // Token: 0x040001D9 RID: 473
             Release = 32768U
         }
 
         [Flags]
         public enum AllocationType : uint
         {
-            // Token: 0x040001C2 RID: 450
             Commit = 4096U,
-            // Token: 0x040001C3 RID: 451
             Reserve = 8192U,
-            // Token: 0x040001C4 RID: 452
             Decommit = 16384U,
-            // Token: 0x040001C5 RID: 453
             Release = 32768U,
-            // Token: 0x040001C6 RID: 454
             Reset = 524288U,
-            // Token: 0x040001C7 RID: 455
             Physical = 4194304U,
-            // Token: 0x040001C8 RID: 456
             TopDown = 1048576U,
-            // Token: 0x040001C9 RID: 457
             WriteWatch = 2097152U,
-            // Token: 0x040001CA RID: 458
             LargePages = 536870912U
         }
 
         [Flags]
         public enum MemoryProtection : uint
         {
-            // Token: 0x040001CC RID: 460
             Execute = 16U,
-            // Token: 0x040001CD RID: 461
             ExecuteRead = 32U,
-            // Token: 0x040001CE RID: 462
             ExecuteReadWrite = 64U,
-            // Token: 0x040001CF RID: 463
             ExecuteWriteCopy = 128U,
-            // Token: 0x040001D0 RID: 464
             NoAccess = 1U,
-            // Token: 0x040001D1 RID: 465
             ReadOnly = 2U,
-            // Token: 0x040001D2 RID: 466
             ReadWrite = 4U,
-            // Token: 0x040001D3 RID: 467
             WriteCopy = 8U,
-            // Token: 0x040001D4 RID: 468
             GuardModifierflag = 256U,
-            // Token: 0x040001D5 RID: 469
             NoCacheModifierflag = 512U,
-            // Token: 0x040001D6 RID: 470
             WriteCombineModifierflag = 1024U
         }
 
