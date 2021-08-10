@@ -204,7 +204,7 @@ namespace ABSoftware
             List<int> l = new List<int>();
             Type KeysType = typeof(Keys);
             FieldInfo[] fields = KeysType.GetFields();
-            for(int i = 0; i < fields.Length; i++)
+            for (int i = 0; i < fields.Length; i++)
             {
                 FieldInfo fi = fields[i];
                 l.Add((int)fi.GetValue(fi.Name));
@@ -226,17 +226,18 @@ namespace ABSoftware
 
             bool[] NewKeysStamp = new bool[KeysConstsCount];
 
-            for(int i = 0; i < KeysConstsCount; i++)
+            for (int i = 0; i < KeysConstsCount; i++)
             {
                 int currentVK_KEY = GetVK(i);
                 bool newState = GetAsyncKeyState(currentVK_KEY) != 0;
                 bool prevState = false;
                 NewKeysStamp[i] = newState;
-                if(newLKS)
+                if (newLKS)
                 {
-                    if(!prevState && newState)
+                    if (!prevState && newState)
                     {
-                        OnKeyDown.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
+                        if (OnKeyDown != null)
+                            OnKeyDown.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
                     }
                 }
                 else
@@ -244,15 +245,18 @@ namespace ABSoftware
                     prevState = LastKeysStamp[i];
                     if (!prevState && newState)
                     {
-                        OnKeyDown.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
+                        if(OnKeyDown != null)
+                            OnKeyDown.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
                     }
                     else if (prevState && !newState)
                     {
-                        OnKeyUp.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
+                        if (OnKeyUp != null)
+                            OnKeyUp.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
                     }
                     else if (prevState && newState)
                     {
-                        OnKeyHeld.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
+                        if (OnKeyHeld != null)
+                            OnKeyHeld.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
                     }
                 }
             }
@@ -267,7 +271,7 @@ namespace ABSoftware
             {
                 string Name = fields[i].Name;
                 int value = (int)fields[i].GetValue(Name);
-                if(value.Equals(VK_KEY))
+                if (value.Equals(VK_KEY))
                     return Name;
                 continue;
             }
