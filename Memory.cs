@@ -84,6 +84,9 @@ namespace ABSoftware
         [DllImport("kernel32.dll")]
         static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength);
 
+        [DllImport("kernel32.dll")]
+        static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, ulong dwLength);
+
         // VirtualFreeEx
         [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
         static extern bool VirtualFreeEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, FreeType dwFreeType);
@@ -274,6 +277,60 @@ namespace ABSoftware
                                 if (num == signature.Length)
                                 {
                                     int addr = ((int)memory_basic_information.BaseAddress) + i;
+                                    l.Add(addr);
+                                }
+                            }
+                            else
+                            {
+                                num = 0;
+                            }
+                        }
+                    }
+                }
+                lpBuffer = null;
+            }
+            return l;
+        }
+
+        public List<long> ReadSignatures(byte[] signature, string mask, long minAddress = 0x11fffffff, long maxAddress = 0x7f0000000)
+        {
+            List<long> l = new List<long>();
+            MEMORY_BASIC_INFORMATION memory_basic_information;
+            memory_basic_information.BaseAddress = IntPtr.Zero;
+            memory_basic_information.RegionSize = IntPtr.Zero;
+            long num = 0;
+            long address = minAddress;
+            while (address < maxAddress)
+            {
+                VirtualQueryEx(handle, (IntPtr)address, out memory_basic_information, (ulong)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+                if (address == (((long)memory_basic_information.BaseAddress) + ((long)memory_basic_information.RegionSize)))
+                {
+                    break;
+                }
+                address = (((long)memory_basic_information.BaseAddress) + ((long)memory_basic_information.RegionSize));
+                byte[] lpBuffer;
+                try
+                {
+                    lpBuffer = new byte[(long)memory_basic_information.RegionSize];
+                }
+                catch(Exception ex)
+                {
+                    continue;
+                }
+                IntPtr lpNumberOfBytesRead = IntPtr.Zero;
+                ReadProcessMemory(handle, memory_basic_information.BaseAddress, lpBuffer, lpBuffer.Length, out lpNumberOfBytesRead);
+                for (long i = 0; i < (lpBuffer.Length - signature.Length); i++)
+                {
+                    if ((lpBuffer[i] == signature[0]) && (lpBuffer[i + 1] == signature[1]))
+                    {
+                        for (int j = 0; j < signature.Length; j++)
+                        {
+                            if ((lpBuffer[i + j] == signature[j]) || (mask[j] == '?'))
+                            {
+                                num++;
+                                if (num == signature.Length)
+                                {
+                                    long addr = ((long)memory_basic_information.BaseAddress) + i;
                                     l.Add(addr);
                                 }
                             }
