@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,14 +27,38 @@ namespace ABSoftware.ServerSDK
             return $"\x1b[0m";
         }
 
+        /// <summary>
+        /// Windows 10+ only
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="color"></param>
         public void Println(string text, Color color)
         {
             Console.WriteLine(Colorize(text, color, ColorType.Foreground));
         }
 
+        /// <summary>
+        /// Windows 10+ only
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="color"></param>
         public void Print(string text, Color color)
         {
             Console.Write(Colorize(text, color, ColorType.Foreground));
+        }
+
+        public void Println(string text, ConsoleColor color = ConsoleColor.Gray)
+        {
+            Console.ForegroundColor = color;
+            Console.WriteLine(text);
+            Console.ResetColor();
+        }
+
+        public void Print(string text, ConsoleColor color = ConsoleColor.Gray)
+        {
+            Console.ForegroundColor = color;
+            Console.Write(text);
+            Console.ResetColor();
         }
 
         public enum ColorType : byte
