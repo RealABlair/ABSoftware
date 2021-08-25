@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Sockets;
 
 using ABSoftware.ServerSDK.ServerSideClient;
+using ABSoftware.ServerSDK.Utils;
 
 namespace ABSoftware.ServerSDK
 {
@@ -29,6 +30,7 @@ namespace ABSoftware.ServerSDK
         public int Port = -1;
         public int ClientBufferSize;
 
+        public Ping pinger = new Ping();
 
         public string ServerName { set { Console.Title = value; } }
 
@@ -161,6 +163,26 @@ namespace ABSoftware.ServerSDK
             }
         }
 
+        public void SendPacket(byte[] packet, string ID)
+        {
+            Client c = clients.FirstOrDefault(f => Equals(f.ID, ID));
+            if (c == null)
+                return;
+            c.sendPacket(packet);
+            OnOutgoingPacket(c, packet);
+        }
+
+        public void SendPacket(byte[] packet)
+        {
+            foreach (Client c in clients)
+            {
+                if (c == null)
+                    continue;
+                c.sendPacket(packet);
+                OnOutgoingPacket(c, packet);
+            }
+        }
+
         public Client[] GetClients()
         {
             return clients.ToArray();
@@ -171,7 +193,10 @@ namespace ABSoftware.ServerSDK
         public virtual void OnClientConnect(Client connectedClient) { }
         public virtual void OnClientDisconnect(Client disconnectedClient) { }
         public virtual void OnIncomingPacket(Client client, string packet) { }
+        public virtual void OnIncomingPacket(Client client, byte[] packet) { }
         public virtual void OnOutgoingPacket(Client client, string packet) { }
+        public virtual void OnOutgoingPacket(Client client, byte[] packet) { }
         public virtual void OnConsoleInput(string input) { }
+        public virtual void OnPing(Client pingedClient, long ping) { }
     }
 }
