@@ -16,7 +16,6 @@ namespace ABSoftware.ServerSDK.ServerSideClient
         public string ID;
         public string IP;
         public TcpClient client;
-        public Ping ping = new Ping();
 
         byte[] buffer = new byte[Server.instance.ClientBufferSize];
         Thread packetListener = null;
@@ -44,10 +43,11 @@ namespace ABSoftware.ServerSDK.ServerSideClient
                     }
                     else
                     {
-                        ping.Update();
                         byte[] bytes = buffer;
                         Array.Resize(ref bytes, count);
+                        Server.instance.pinger.OnIncomingPacket(this, bytes);
                         Server.instance.OnIncomingPacket(this, Encoding.UTF8.GetString(bytes));
+                        Server.instance.OnIncomingPacket(this, bytes);
                     }
                 }
             }
