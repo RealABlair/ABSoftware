@@ -46,7 +46,6 @@ namespace ABSoftware.ServerSDK.ServerSideClient
                         byte[] bytes = buffer;
                         Array.Resize(ref bytes, count);
                         Server.instance.pinger.OnIncomingPacket(this, bytes);
-                        Server.instance.OnIncomingPacket(this, Encoding.UTF8.GetString(bytes));
                         Server.instance.OnIncomingPacket(this, bytes);
                     }
                 }
