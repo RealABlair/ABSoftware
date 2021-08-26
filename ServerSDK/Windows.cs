@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -25,7 +25,9 @@ namespace ABSoftware.ServerSDK
         [DllImport(USER)]
         public static extern IntPtr GetForegroundWindow();
 
-
+        public delegate bool ConsoleEventDelegate(int eventType);
+        [DllImport(KERNEL, SetLastError = true)]
+        public static extern bool SetConsoleCtrlHandler(ConsoleEventDelegate callback, bool add);
 
         #endregion
 
