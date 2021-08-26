@@ -9,19 +9,21 @@ namespace ABSoftware.ServerSDK.Utils
 {
     public class Ping
     {
+        Random rnd = new Random();
         List<PingWaiter> pings = new List<PingWaiter>();
 
         public void SendPing(Client pingClient)
         {
             Server.instance.Println(DateTime.Now.Ticks.ToString(), Color.Red);
-            pings.Add(new PingWaiter() { client = pingClient, ping = DateTime.Now.Ticks });
-            Server.instance.SendPacket(new byte[] { 0x00 }, pingClient.ID);
+            byte[] bytes = Encoding.UTF8.GetBytes(GetNewID(pingClient));
+            pings.Add(new PingWaiter() { client = pingClient, ping = DateTime.Now.Ticks, pingPacket = bytes });
+            Server.instance.SendPacket(bytes, pingClient.ID);
         }
 
         public void OnIncomingPacket(Client client, byte[] packet)
         {
             PingWaiter pw;
-            if (PingIsSent(client.ID, out pw) && packet.Length == 1 && packet[0] == 0x00)
+            if (PingIsSent(client.ID, out pw) && pw.pingPacket.Length.Equals(packet.Length) && Enumerable.SequenceEqual(pw.pingPacket, packet))
             {
                 ApplyPing(pw);
             }
@@ -42,9 +44,15 @@ namespace ABSoftware.ServerSDK.Utils
             Server.instance.OnPing(pw.client, (long)(t2 - t1).TotalMilliseconds);
         }
 
+        string GetNewID(Client client)
+        {
+            return client.ID + "-" + rnd.Next(0, 999999).ToString("X2");
+        }
+
         class PingWaiter
         {
             public Client client;
+            public byte[] pingPacket;
             public long ping;
         }
     }
