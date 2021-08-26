@@ -149,7 +149,7 @@ namespace ABSoftware.ServerSDK
             if (c == null)
                 return;
             c.sendPacket(Encoding.UTF8.GetBytes(packet));
-            OnOutgoingPacket(c, packet);
+            OnOutgoingPacket(c, Encoding.UTF8.GetBytes(packet));
         }
 
         public void SendPacket(string packet)
@@ -159,7 +159,7 @@ namespace ABSoftware.ServerSDK
                 if (c == null)
                     continue;
                 c.sendPacket(Encoding.UTF8.GetBytes(packet));
-                OnOutgoingPacket(c, packet);
+                OnOutgoingPacket(c, Encoding.UTF8.GetBytes(packet));
             }
         }
 
@@ -192,9 +192,7 @@ namespace ABSoftware.ServerSDK
         public virtual void OnServerStop() { }
         public virtual void OnClientConnect(Client connectedClient) { }
         public virtual void OnClientDisconnect(Client disconnectedClient) { }
-        public virtual void OnIncomingPacket(Client client, string packet) { }
         public virtual void OnIncomingPacket(Client client, byte[] packet) { }
-        public virtual void OnOutgoingPacket(Client client, string packet) { }
         public virtual void OnOutgoingPacket(Client client, byte[] packet) { }
         public virtual void OnConsoleInput(string input) { }
         public virtual void OnPing(Client pingedClient, long ping) { }
