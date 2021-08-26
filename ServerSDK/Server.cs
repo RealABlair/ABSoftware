@@ -12,10 +12,14 @@ using System.Net.Sockets;
 using ABSoftware.ServerSDK.ServerSideClient;
 using ABSoftware.ServerSDK.Utils;
 
+using static ABSoftware.ServerSDK.Windows;
+
 namespace ABSoftware.ServerSDK
 {
     public class Server : Display
     {
+        static ConsoleEventDelegate handler;
+
         public static Server instance;
 
         Random rnd = new Random();
@@ -37,6 +41,8 @@ namespace ABSoftware.ServerSDK
         public void StartNetwork(int port, int ClientBufferSize = 1024)
         {
             instance = this;
+            handler = new ConsoleEventDelegate(ConsoleEventCallback);
+            SetConsoleCtrlHandler(handler, true);
             Init();
             ServerName = $"'{GetType().Name}' - Server is supported by ABlair";
             this.Port = port;
@@ -186,6 +192,15 @@ namespace ABSoftware.ServerSDK
         public Client[] GetClients()
         {
             return clients.ToArray();
+        }
+
+        bool ConsoleEventCallback(int eventType)
+        {
+            if(eventType == 2)
+            {
+                StopNetwork();
+            }
+            return false;
         }
 
         public virtual void OnServerStart() { }
