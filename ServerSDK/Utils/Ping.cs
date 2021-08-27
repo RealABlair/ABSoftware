@@ -15,9 +15,9 @@ namespace ABSoftware.ServerSDK.Utils
         public void SendPing(Client pingClient)
         {
             Server.instance.Println(DateTime.Now.Ticks.ToString(), Color.Red);
-            byte[] bytes = Encoding.UTF8.GetBytes(GetNewID(pingClient));
-            pings.Add(new PingWaiter() { client = pingClient, ping = DateTime.Now.Ticks, pingPacket = bytes });
+            byte[] bytes = Encoding.UTF8.GetBytes("ping" + GetNewID(pingClient));
             Server.instance.SendPacket(bytes, pingClient.ID);
+            pings.Add(new PingWaiter() { client = pingClient, ping = DateTime.Now.Ticks, pingPacket = bytes.Skip(4).ToArray() });
         }
 
         public void OnIncomingPacket(Client client, byte[] packet)
