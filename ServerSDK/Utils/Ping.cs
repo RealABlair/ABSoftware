@@ -38,10 +38,10 @@ namespace ABSoftware.ServerSDK.Utils
 
         void ApplyPing(PingWaiter pw)
         {
-            pings.Remove(pw);
             DateTime t1 = new DateTime(pw.ping);
             DateTime t2 = DateTime.Now;
             Server.instance.OnPing(pw.client, (long)(t2 - t1).TotalMilliseconds);
+            pings.Remove(pw);
         }
 
         string GetNewID(Client client)
