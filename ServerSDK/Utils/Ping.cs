@@ -25,7 +25,6 @@ namespace ABSoftware.ServerSDK.Utils
             PingWaiter pw = null;
             if (PingIsSent(client.ID, out pw))
             {
-                Console.WriteLine(Enumerable.SequenceEqual(pw.pingPacket, packet));
                 if (pw.pingPacket.Length.Equals(packet.Length) && Enumerable.SequenceEqual(pw.pingPacket, packet))
                     ApplyPing(pw);
             }
