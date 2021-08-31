@@ -16,15 +16,18 @@ namespace ABSoftware.ServerSDK.Utils
         {
             byte[] bytes = Encoding.UTF8.GetBytes("ping" + GetNewID(pingClient));
             Server.instance.SendPacket(bytes, pingClient.ID);
-            pings.Add(new PingWaiter() { client = pingClient, ping = DateTime.Now.Ticks, pingPacket = bytes.Skip(4).ToArray() });
+            PingWaiter pw = new PingWaiter() { client = pingClient, ping = DateTime.Now.Ticks, pingPacket = bytes.Skip(4).ToArray() };
+            pings.Add(pw);
         }
 
         public void OnIncomingPacket(Client client, byte[] packet)
         {
-            PingWaiter pw;
-            if (PingIsSent(client.ID, out pw) && pw.pingPacket.Length.Equals(packet.Length) && Enumerable.SequenceEqual(pw.pingPacket, packet))
+            PingWaiter pw = null;
+            if (PingIsSent(client.ID, out pw))
             {
-                ApplyPing(pw);
+                Console.WriteLine(Enumerable.SequenceEqual(pw.pingPacket, packet));
+                if (pw.pingPacket.Length.Equals(packet.Length) && Enumerable.SequenceEqual(pw.pingPacket, packet))
+                    ApplyPing(pw);
             }
         }
 
