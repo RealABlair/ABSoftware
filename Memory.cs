@@ -278,6 +278,7 @@ namespace ABSoftware
                                 {
                                     int addr = ((int)memory_basic_information.BaseAddress) + i;
                                     l.Add(addr);
+                                    num = 0;
                                 }
                             }
                             else
@@ -332,6 +333,7 @@ namespace ABSoftware
                                 {
                                     long addr = ((long)memory_basic_information.BaseAddress) + i;
                                     l.Add(addr);
+                                    num = 0;
                                 }
                             }
                             else
