@@ -623,7 +623,7 @@ namespace ABSoftware
                 return true;
             }
             value = null;
-            return true;
+            return false;
         }
 
         public bool ReadByte(long address, out byte value)
