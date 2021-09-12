@@ -246,6 +246,60 @@ namespace ABSoftware
             return 0;
         }
 
+        public long ReadSignature(byte[] signature, string mask, long minAddress = 0x11fffffff, long maxAddress = 0x7f0000000)
+        {
+            MEMORY_BASIC_INFORMATION memory_basic_information;
+            memory_basic_information.BaseAddress = IntPtr.Zero;
+            memory_basic_information.RegionSize = IntPtr.Zero;
+            long num = 0;
+            long address = minAddress;
+            while (address < maxAddress)
+            {
+                VirtualQueryEx(handle, (IntPtr)address, out memory_basic_information, (ulong)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+                if (address == (((long)memory_basic_information.BaseAddress) + ((long)memory_basic_information.RegionSize)))
+                {
+                    break;
+                }
+                address = (((long)memory_basic_information.BaseAddress) + ((long)memory_basic_information.RegionSize));
+                byte[] lpBuffer;
+                try
+                {
+                    lpBuffer = new byte[(long)memory_basic_information.RegionSize];
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+                int lpNumberOfBytesRead = 0;
+                ReadProcessMemory(handle, memory_basic_information.BaseAddress, lpBuffer, lpBuffer.Length, out lpNumberOfBytesRead);
+                for (int i = 0; i < (lpBuffer.Length - signature.Length); i++)
+                {
+                    if ((lpBuffer[i] == signature[0]) && (lpBuffer[i + 1] == signature[1]))
+                    {
+                        for (int j = 0; j < signature.Length; j++)
+                        {
+                            if ((lpBuffer[i + j] == signature[j]) || (mask[j] == '?'))
+                            {
+                                num++;
+                                if (num == signature.Length)
+                                {
+                                    Console.WriteLine(address.ToString("X2"));
+                                    long addr = ((long)memory_basic_information.BaseAddress) + i;
+                                    return addr;
+                                }
+                            }
+                            else
+                            {
+                                num = 0;
+                            }
+                        }
+                    }
+                }
+                lpBuffer = null;
+            }
+            return 0;
+        }
+
         public List<int> ReadSignatures(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x7f000000)
         {
             List<int> l = new List<int>();
@@ -314,7 +368,7 @@ namespace ABSoftware
                 {
                     lpBuffer = new byte[(long)memory_basic_information.RegionSize];
                 }
-                catch(Exception ex)
+                catch (Exception)
                 {
                     continue;
                 }
