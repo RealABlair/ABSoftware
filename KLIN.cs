@@ -28,6 +28,8 @@ namespace ABSoftware
         public void Parse(string KLIN)
         {
             KLCODE = KLIN;
+            if (KLIN.Length < 3)
+                return;
             string[] Lines = KLIN.Split('\n');
             for(int i = 0; i < Lines.Length; i++)
             {
