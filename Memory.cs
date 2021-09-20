@@ -30,6 +30,20 @@ namespace ABSoftware
             public uint Type;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MEMORY_BASIC_INFORMATION64
+        {
+            public ulong BaseAddress;
+            public ulong AllocationBase;
+            public int AllocationProtect;
+            public int __alignment1;
+            public ulong RegionSize;
+            public int State;
+            public int Protect;
+            public int Type;
+            public int __alignment2;
+        }
+
         [Flags]
         public enum FreeType : uint
         {
@@ -86,6 +100,9 @@ namespace ABSoftware
 
         [DllImport("kernel32.dll")]
         static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, ulong dwLength);
+
+        [DllImport("kernel32.dll")]
+        static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION64 lpBuffer, ulong dwLength);
 
         // VirtualFreeEx
         [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
@@ -201,7 +218,7 @@ namespace ABSoftware
             return handle;
         }
 
-        public int ReadSignature(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x7f000000)
+        public int ReadSignature32(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x7f000000)
         {
             MEMORY_BASIC_INFORMATION memory_basic_information;
             memory_basic_information.BaseAddress = IntPtr.Zero;
@@ -246,16 +263,16 @@ namespace ABSoftware
             return 0;
         }
 
-        public long ReadSignature(byte[] signature, string mask, long minAddress = 0x11fffffff, long maxAddress = 0x7f0000000)
+        public long ReadSignature64(byte[] signature, string mask, long minAddress = 0x11FFFFFFFFFF, long maxAddress = 0x7FFFFFFFFFFF)
         {
-            MEMORY_BASIC_INFORMATION memory_basic_information;
-            memory_basic_information.BaseAddress = IntPtr.Zero;
-            memory_basic_information.RegionSize = IntPtr.Zero;
+            MEMORY_BASIC_INFORMATION64 memory_basic_information;
+            memory_basic_information.BaseAddress = (ulong)IntPtr.Zero;
+            memory_basic_information.RegionSize = (ulong)IntPtr.Zero;
             long num = 0;
             long address = minAddress;
             while (address < maxAddress)
             {
-                VirtualQueryEx(handle, (IntPtr)address, out memory_basic_information, (ulong)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+                VirtualQueryEx(handle, (IntPtr)address, out memory_basic_information, (ulong)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION64)));
                 if (address == (((long)memory_basic_information.BaseAddress) + ((long)memory_basic_information.RegionSize)))
                 {
                     break;
@@ -271,7 +288,7 @@ namespace ABSoftware
                     continue;
                 }
                 int lpNumberOfBytesRead = 0;
-                ReadProcessMemory(handle, memory_basic_information.BaseAddress, lpBuffer, lpBuffer.Length, out lpNumberOfBytesRead);
+                ReadProcessMemory(handle, (IntPtr)memory_basic_information.BaseAddress, lpBuffer, lpBuffer.Length, out lpNumberOfBytesRead);
                 for (int i = 0; i < (lpBuffer.Length - signature.Length); i++)
                 {
                     if ((lpBuffer[i] == signature[0]) && (lpBuffer[i + 1] == signature[1]))
@@ -283,7 +300,6 @@ namespace ABSoftware
                                 num++;
                                 if (num == signature.Length)
                                 {
-                                    Console.WriteLine(address.ToString("X2"));
                                     long addr = ((long)memory_basic_information.BaseAddress) + i;
                                     return addr;
                                 }
@@ -300,7 +316,7 @@ namespace ABSoftware
             return 0;
         }
 
-        public List<int> ReadSignatures(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x7f000000)
+        public List<int> ReadSignatures32(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x7f000000)
         {
             List<int> l = new List<int>();
             MEMORY_BASIC_INFORMATION memory_basic_information;
@@ -346,18 +362,18 @@ namespace ABSoftware
             }
             return l;
         }
-
-        public List<long> ReadSignatures(byte[] signature, string mask, long minAddress = 0x11fffffff, long maxAddress = 0x7f0000000)
+                                                                                            
+        public List<long> ReadSignatures64(byte[] signature, string mask, long minAddress = 0x11FFFFFFFFFF, long maxAddress = 0x7FFFFFFFFFFF)
         {
             List<long> l = new List<long>();
-            MEMORY_BASIC_INFORMATION memory_basic_information;
-            memory_basic_information.BaseAddress = IntPtr.Zero;
-            memory_basic_information.RegionSize = IntPtr.Zero;
+            MEMORY_BASIC_INFORMATION64 memory_basic_information;
+            memory_basic_information.BaseAddress = (ulong)IntPtr.Zero;
+            memory_basic_information.RegionSize = (ulong)IntPtr.Zero;
             long num = 0;
             long address = minAddress;
             while (address < maxAddress)
             {
-                VirtualQueryEx(handle, (IntPtr)address, out memory_basic_information, (ulong)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION)));
+                VirtualQueryEx(handle, (IntPtr)address, out memory_basic_information, (ulong)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION64)));
                 if (address == (((long)memory_basic_information.BaseAddress) + ((long)memory_basic_information.RegionSize)))
                 {
                     break;
@@ -372,8 +388,8 @@ namespace ABSoftware
                 {
                     continue;
                 }
-                IntPtr lpNumberOfBytesRead = IntPtr.Zero;
-                ReadProcessMemory(handle, memory_basic_information.BaseAddress, lpBuffer, lpBuffer.Length, out lpNumberOfBytesRead);
+                int lpNumberOfBytesRead = 0;
+                ReadProcessMemory(handle, (IntPtr)memory_basic_information.BaseAddress, lpBuffer, lpBuffer.Length, out lpNumberOfBytesRead);
                 for (long i = 0; i < (lpBuffer.Length - signature.Length); i++)
                 {
                     if ((lpBuffer[i] == signature[0]) && (lpBuffer[i + 1] == signature[1]))
@@ -402,7 +418,7 @@ namespace ABSoftware
             return l;
         }
 
-        public List<int> ReadInts(int scanObject, int minAddress = 0x00000000, int maxAddress = 0x7f000000)
+        public List<int> ReadInts32(int scanObject, int minAddress = 0x00000000, int maxAddress = 0x7f000000)
         {
             List<int> l = new List<int>();
             int address = minAddress;
@@ -441,7 +457,7 @@ namespace ABSoftware
             return l;
         }
 
-        public List<int> ReadLongs(long scanObject, int minAddress = 0x00000000, int maxAddress = 0x7f000000)
+        public List<int> ReadLongs32(long scanObject, int minAddress = 0x00000000, int maxAddress = 0x7f000000)
         {
             List<int> l = new List<int>();
             int address = minAddress;
@@ -492,7 +508,7 @@ namespace ABSoftware
             return l;
         }
 
-        public List<int> ReadDoubles(double scanObject, int minAddress = 0x00000000, int maxAddress = 0x7f000000)
+        public List<int> ReadDoubles32(double scanObject, int minAddress = 0x00000000, int maxAddress = 0x7f000000)
         {
             List<int> l = new List<int>();
             int address = minAddress;
@@ -543,7 +559,7 @@ namespace ABSoftware
             return l;
         }
 
-        public List<int> ReadFloats(float scanObject, int minAddress = 0x00000000, int maxAddress = 0x7f000000)
+        public List<int> ReadFloats32(float scanObject, int minAddress = 0x00000000, int maxAddress = 0x7f000000)
         {
             List<int> l = new List<int>();
             int address = minAddress;
@@ -578,6 +594,186 @@ namespace ABSoftware
                     }
                 }
                 address = (int)_BASIC_INFORMATION.BaseAddress + (int)_BASIC_INFORMATION.RegionSize;
+            }
+            return l;
+        }
+
+        public List<long> ReadInts64(int scanObject, long minAddress = 0x11FFFFFFFFFF, long maxAddress = 0x7FFFFFFFFFFF)
+        {
+            List<long> l = new List<long>();
+            long address = minAddress;
+            byte[] data = Convertation.GetBytes(scanObject);
+            MEMORY_BASIC_INFORMATION64 _BASIC_INFORMATION;
+            _BASIC_INFORMATION.RegionSize = 0;
+            _BASIC_INFORMATION.RegionSize = 0;
+            while (address <= maxAddress)
+            {
+                VirtualQueryEx(handle, (IntPtr)address, out _BASIC_INFORMATION, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION64)));
+                if (address != (uint)_BASIC_INFORMATION.BaseAddress + (uint)_BASIC_INFORMATION.RegionSize)
+                {
+                    byte[] buffer = new byte[(uint)_BASIC_INFORMATION.RegionSize];
+                    int Dammy = 0;
+                    ReadProcessMemory(handle, (IntPtr)_BASIC_INFORMATION.BaseAddress, buffer, (int)_BASIC_INFORMATION.RegionSize, out Dammy);
+                    for (int i = 0; i < buffer.Length - data.Length; i++)
+                    {
+                        if (buffer[i] == data[0])
+                        {
+                            if (buffer[i + 1] == data[1])
+                            {
+                                if (buffer[i + 2] == data[2])
+                                {
+                                    if (buffer[i + 3] == data[3])
+                                    {
+                                        long MyAddress = (long)_BASIC_INFORMATION.BaseAddress + i;
+                                        l.Add(MyAddress);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                address = (long)_BASIC_INFORMATION.BaseAddress + (long)_BASIC_INFORMATION.RegionSize;
+            }
+            return l;
+        }
+
+        public List<long> ReadLongs64(long scanObject, long minAddress = 0x11FFFFFFFFFF, long maxAddress = 0x7FFFFFFFFFFF)
+        {
+            List<long> l = new List<long>();
+            long address = minAddress;
+            byte[] data = Convertation.GetBytes(scanObject);
+            MEMORY_BASIC_INFORMATION64 _BASIC_INFORMATION;
+            _BASIC_INFORMATION.RegionSize = 0;
+            _BASIC_INFORMATION.RegionSize = 0;
+            while (address <= maxAddress)
+            {
+                VirtualQueryEx(handle, (IntPtr)address, out _BASIC_INFORMATION, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION64)));
+                if (address != (uint)_BASIC_INFORMATION.BaseAddress + (uint)_BASIC_INFORMATION.RegionSize)
+                {
+                    byte[] buffer = new byte[(uint)_BASIC_INFORMATION.RegionSize];
+                    int Dammy = 0;
+                    ReadProcessMemory(handle, (IntPtr)_BASIC_INFORMATION.BaseAddress, buffer, (int)_BASIC_INFORMATION.RegionSize, out Dammy);
+                    for (int i = 0; i < buffer.Length - data.Length; i++)
+                    {
+                        if (buffer[i] == data[0])
+                        {
+                            if (buffer[i + 1] == data[1])
+                            {
+                                if (buffer[i + 2] == data[2])
+                                {
+                                    if (buffer[i + 3] == data[3])
+                                    {
+                                        if (buffer[i + 4] == data[4])
+                                        {
+                                            if (buffer[i + 5] == data[5])
+                                            {
+                                                if (buffer[i + 6] == data[6])
+                                                {
+                                                    if (buffer[i + 7] == data[7])
+                                                    {
+                                                        long MyAddress = (long)_BASIC_INFORMATION.BaseAddress + i;
+                                                        l.Add(MyAddress);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                address = (long)_BASIC_INFORMATION.BaseAddress + (long)_BASIC_INFORMATION.RegionSize;
+            }
+            return l;
+        }
+
+        public List<long> ReadDoubles64(double scanObject, long minAddress = 0x11FFFFFFFFFF, long maxAddress = 0x7FFFFFFFFFFF)
+        {
+            List<long> l = new List<long>();
+            long address = minAddress;
+            byte[] data = Convertation.GetBytes(scanObject);
+            MEMORY_BASIC_INFORMATION64 _BASIC_INFORMATION;
+            _BASIC_INFORMATION.RegionSize = 0;
+            _BASIC_INFORMATION.RegionSize = 0;
+            while (address <= maxAddress)
+            {
+                VirtualQueryEx(handle, (IntPtr)address, out _BASIC_INFORMATION, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION64)));
+                if (address != (uint)_BASIC_INFORMATION.BaseAddress + (uint)_BASIC_INFORMATION.RegionSize)
+                {
+                    byte[] buffer = new byte[(uint)_BASIC_INFORMATION.RegionSize];
+                    int Dammy = 0;
+                    ReadProcessMemory(handle, (IntPtr)_BASIC_INFORMATION.BaseAddress, buffer, (int)_BASIC_INFORMATION.RegionSize, out Dammy);
+                    for (int i = 0; i < buffer.Length - data.Length; i++)
+                    {
+                        if (buffer[i] == data[0])
+                        {
+                            if (buffer[i + 1] == data[1])
+                            {
+                                if (buffer[i + 2] == data[2])
+                                {
+                                    if (buffer[i + 3] == data[3])
+                                    {
+                                        if (buffer[i + 4] == data[4])
+                                        {
+                                            if (buffer[i + 5] == data[5])
+                                            {
+                                                if (buffer[i + 6] == data[6])
+                                                {
+                                                    if (buffer[i + 7] == data[7])
+                                                    {
+                                                        long MyAddress = (long)_BASIC_INFORMATION.BaseAddress + i;
+                                                        l.Add(MyAddress);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                address = (long)_BASIC_INFORMATION.BaseAddress + (long)_BASIC_INFORMATION.RegionSize;
+            }
+            return l;
+        }
+
+        public List<long> ReadFloats64(float scanObject, long minAddress = 0x11FFFFFFFFFF, long maxAddress = 0x7FFFFFFFFFFF)
+        {
+            List<long> l = new List<long>();
+            long address = minAddress;
+            byte[] data = Convertation.GetBytes(scanObject);
+            MEMORY_BASIC_INFORMATION64 _BASIC_INFORMATION;
+            _BASIC_INFORMATION.RegionSize = 0;
+            _BASIC_INFORMATION.RegionSize = 0;
+            while (address <= maxAddress)
+            {
+                VirtualQueryEx(handle, (IntPtr)address, out _BASIC_INFORMATION, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION64)));
+                if (address != (uint)_BASIC_INFORMATION.BaseAddress + (uint)_BASIC_INFORMATION.RegionSize)
+                {
+                    byte[] buffer = new byte[(uint)_BASIC_INFORMATION.RegionSize];
+                    int Dammy = 0;
+                    ReadProcessMemory(handle, (IntPtr)_BASIC_INFORMATION.BaseAddress, buffer, (int)_BASIC_INFORMATION.RegionSize, out Dammy);
+                    for (int i = 0; i < buffer.Length - data.Length; i++)
+                    {
+                        if (buffer[i] == data[0])
+                        {
+                            if (buffer[i + 1] == data[1])
+                            {
+                                if (buffer[i + 2] == data[2])
+                                {
+                                    if (buffer[i + 3] == data[3])
+                                    {
+                                        long MyAddress = (long)_BASIC_INFORMATION.BaseAddress + i;
+                                        l.Add(MyAddress);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                address = (long)_BASIC_INFORMATION.BaseAddress + (long)_BASIC_INFORMATION.RegionSize;
             }
             return l;
         }
@@ -770,6 +966,18 @@ namespace ABSoftware
             IntPtr IpAddress = (IntPtr)address;
             IntPtr outTrash = IntPtr.Zero;
             return WriteProcessMemory(handle, IpAddress, bytes, bytes.Length, out outTrash);
+        }
+
+        public bool AllocateMemory(IntPtr address, int size, MemoryProtection protection)
+        {
+            IntPtr allocatedMemory = VirtualAllocEx(handle, address, (uint)size, AllocationType.Commit | AllocationType.Reserve, protection);
+
+            return allocatedMemory != IntPtr.Zero;
+        }
+
+        public bool FreeMemory(IntPtr address)
+        {
+            return VirtualFreeEx(handle, address, 0, FreeType.Release);
         }
 
         public bool InjectDll(string dllPath)
