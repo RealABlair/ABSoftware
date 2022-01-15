@@ -16,6 +16,9 @@ namespace ABSoftware
         [DllImport("USER32.dll")]
         public static extern short GetKeyState(int nVirtKey);
 
+        [DllImport("user32.dll")]
+        static extern void keybd_event(int nVirtKey, byte bScan, uint dwFlags, int dwExtraInfo);
+
         static List<int> KEYS_CONSTS { get { return ScanKeysConsts(); } }
 
         static bool[] LastKeysStamp;
@@ -212,6 +215,20 @@ namespace ABSoftware
             return l;
         }
 
+        public static uint KEYEVENTF_KEYDOWN = 0x0000;
+        public static uint KEYEVENTF_KEYUP = 0x0002;
+        public static uint KEYEVENTF_EXTENDEDKEY = 0x0001;
+
+        public static void PressKey(int VK_KEY)
+        {
+            keybd_event(VK_KEY, 0x45, KEYEVENTF_KEYDOWN, 0);
+        }
+
+        public static void ReleaseKey(int VK_KEY)
+        {
+            keybd_event(VK_KEY, 0x45, KEYEVENTF_KEYUP, 0);
+        }
+
         public static void UpdateKeys()
         {
             int KeysConstsCount = KEYS_CONSTS.Count;
@@ -245,7 +262,7 @@ namespace ABSoftware
                     prevState = LastKeysStamp[i];
                     if (!prevState && newState)
                     {
-                        if(OnKeyDown != null)
+                        if (OnKeyDown != null)
                             OnKeyDown.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
                     }
                     else if (prevState && !newState)
