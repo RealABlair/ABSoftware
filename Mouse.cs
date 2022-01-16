@@ -11,7 +11,7 @@ namespace ABSoftware
     public abstract class Mouse
     {
         [DllImport("user32.dll")]
-        static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, UIntPtr dwExtraInfo);
+        public static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, UIntPtr dwExtraInfo);
 
         [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -29,31 +29,6 @@ namespace ABSoftware
                 this.y = y;
             }
         }
-
-        public bool LMBPressed = false;
-
-        public bool lmb { get { return LMBPressed; } set { LMBSet(value); } }
-
-
-        void LMBSet(bool v)
-        {
-            if (v == LMBPressed)
-                return;
-
-            if(v)
-            {
-                OnKeyDownL();
-            }
-            else
-            {
-                OnKeyUpL();
-            }
-
-            LMBPressed = v;
-        }
-
-        public abstract void OnKeyUpL();
-        public abstract void OnKeyDownL();
 
         public struct Flags
         {
