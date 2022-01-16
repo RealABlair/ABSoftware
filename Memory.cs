@@ -81,6 +81,25 @@ namespace ABSoftware
             WriteCombineModifierflag = 1024U
         }
 
+        #region WM_CONSTS
+        public const uint WM_KEYDOWN = 0x0100;
+        public const uint WM_KEYUP = 0x0101;
+        public const uint WM_CHAR = 0x0102;
+        #endregion
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, uint wParam, StringBuilder lParam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, uint wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, uint wParam, ref int lParam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, uint wParam, int lParam);
+
+
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern IntPtr GetModuleHandle(string lpModuleName);
 
@@ -165,6 +184,7 @@ namespace ABSoftware
         public string process_name { get; private set; }
         public int process_id { get; private set; }
         IntPtr handle = IntPtr.Zero;
+        IntPtr hWnd = IntPtr.Zero;
         public List<ProcessModule> modules = new List<ProcessModule>();
 
 
@@ -179,6 +199,7 @@ namespace ABSoftware
             {
                 process_id = p.Id;
                 handle = OpenProcess(p, ProcessAccessFlags.All);
+                hWnd = p.MainWindowHandle;
             }
             else
             {
@@ -200,6 +221,7 @@ namespace ABSoftware
                 process_name = p.ProcessName;
                 process_id = p.Id;
                 handle = OpenProcess(p, ProcessAccessFlags.All);
+                hWnd = p.MainWindowHandle;
             }
             else
             {
@@ -216,6 +238,11 @@ namespace ABSoftware
         public IntPtr getHandle()
         {
             return handle;
+        }
+
+        public IntPtr getHWND()
+        {
+            return hWnd;
         }
 
         public int ReadSignature32(byte[] signature, string mask, int minAddress = 0x11ffffff, int maxAddress = 0x7f000000)
@@ -1011,6 +1038,21 @@ namespace ABSoftware
             }
 
             return true;
+        }
+
+        public void PressKey(uint key)
+        {
+            SendMessage(hWnd, WM_KEYDOWN, key, 0);
+        }
+
+        public void ReleaseKey(uint key)
+        {
+            SendMessage(hWnd, WM_KEYUP, key, 0);
+        }
+
+        public void SendChar(uint key)
+        {
+            SendMessage(hWnd, WM_CHAR, key, 0);
         }
 
         public class Convertation
