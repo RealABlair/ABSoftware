@@ -219,6 +219,11 @@ namespace ABSoftware
         public static uint KEYEVENTF_KEYUP = 0x0002;
         public static uint KEYEVENTF_EXTENDEDKEY = 0x0001;
 
+        public static void ExtendedKey(int VK_KEY)
+        {
+            keybd_event(VK_KEY, 0x45, KEYEVENTF_EXTENDEDKEY, 0);
+        }
+        
         public static void PressKey(int VK_KEY)
         {
             keybd_event(VK_KEY, 0x45, KEYEVENTF_KEYDOWN, 0);
