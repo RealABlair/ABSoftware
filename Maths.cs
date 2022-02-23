@@ -110,6 +110,40 @@ namespace ABSoftware
             return (val - start) / (end - start);
         }
 
+        public static float WrapAngleTo180(float value)
+        {
+            value = value % 360.0f;
+
+            if (value >= 180.0f)
+            {
+                value -= 360.0f;
+            }
+
+            if (value < -180.0f)
+            {
+                value += 360.0f;
+            }
+
+            return value;
+        }
+        
+        public static double WrapAngleTo180(double value)
+        {
+            value = value % 360.0;
+
+            if (value >= 180.0)
+            {
+                value -= 360.0;
+            }
+
+            if (value < -180.0)
+            {
+                value += 360.0;
+            }
+
+            return value;
+        }
+        
         public class Random
         {
             static System.Random rnd = new System.Random();
