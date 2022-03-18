@@ -31,6 +31,12 @@ namespace ABSoftware
         {
             return elements[id];
         }
+        
+        public T this[int id]
+        {
+            get { return elements[id]; }
+            set { elements[id] = value; }
+        }
 
         public void Add(T element)
         {
