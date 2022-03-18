@@ -59,5 +59,10 @@ namespace ABSoftware
         {
             elements = new T[0];
         }
+        
+        public bool Contains(T element)
+        {
+            return elements.Contains(element);
+        }
     }
 }
