@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 
 namespace ABSoftware
@@ -259,17 +257,18 @@ namespace ABSoftware
                 {
                     break;
                 }
-                address = (((int)memory_basic_information.BaseAddress) + ((int)memory_basic_information.RegionSize));
+                address = ((int)memory_basic_information.BaseAddress) + ((int)memory_basic_information.RegionSize);
                 byte[] lpBuffer = new byte[(int)memory_basic_information.RegionSize];
                 int lpNumberOfBytesRead = 0;
                 ReadProcessMemory(handle, memory_basic_information.BaseAddress, lpBuffer, lpBuffer.Length, out lpNumberOfBytesRead);
+
                 for (int i = 0; i < (lpBuffer.Length - signature.Length); i++)
                 {
-                    if ((lpBuffer[i] == signature[0]) && (lpBuffer[i + 1] == signature[1]))
+                    if ((lpBuffer[i] == signature[0] || mask[0] == '?') && (lpBuffer[i + 1] == signature[1] || mask[1] == '?'))
                     {
                         for (int j = 0; j < signature.Length; j++)
                         {
-                            if ((lpBuffer[i + j] == signature[j]) || (mask[j] == '?'))
+                            if ((mask[j] == '?') || (lpBuffer[i + j] == signature[j]))
                             {
                                 num++;
                                 if (num == signature.Length)
@@ -318,7 +317,7 @@ namespace ABSoftware
                 ReadProcessMemory(handle, (IntPtr)memory_basic_information.BaseAddress, lpBuffer, lpBuffer.Length, out lpNumberOfBytesRead);
                 for (int i = 0; i < (lpBuffer.Length - signature.Length); i++)
                 {
-                    if ((lpBuffer[i] == signature[0]) && (lpBuffer[i + 1] == signature[1]))
+                    if ((lpBuffer[i] == signature[0] || mask[0] == '?') && (lpBuffer[i + 1] == signature[1] || mask[1] == '?'))
                     {
                         for (int j = 0; j < signature.Length; j++)
                         {
@@ -364,7 +363,7 @@ namespace ABSoftware
                 ReadProcessMemory(handle, memory_basic_information.BaseAddress, lpBuffer, lpBuffer.Length, out lpNumberOfBytesRead);
                 for (int i = 0; i < (lpBuffer.Length - signature.Length); i++)
                 {
-                    if ((lpBuffer[i] == signature[0]) && (lpBuffer[i + 1] == signature[1]))
+                    if ((lpBuffer[i] == signature[0] || mask[0] == '?') && (lpBuffer[i + 1] == signature[1] || mask[1] == '?'))
                     {
                         for (int j = 0; j < signature.Length; j++)
                         {
@@ -389,7 +388,7 @@ namespace ABSoftware
             }
             return l;
         }
-                                                                                            
+
         public List<long> ReadSignatures64(byte[] signature, string mask, long minAddress = 0x11FFFFFFFFFF, long maxAddress = 0x7FFFFFFFFFFF)
         {
             List<long> l = new List<long>();
@@ -419,7 +418,7 @@ namespace ABSoftware
                 ReadProcessMemory(handle, (IntPtr)memory_basic_information.BaseAddress, lpBuffer, lpBuffer.Length, out lpNumberOfBytesRead);
                 for (long i = 0; i < (lpBuffer.Length - signature.Length); i++)
                 {
-                    if ((lpBuffer[i] == signature[0]) && (lpBuffer[i + 1] == signature[1]))
+                    if ((lpBuffer[i] == signature[0] || mask[0] == '?') && (lpBuffer[i + 1] == signature[1] || mask[1] == '?'))
                     {
                         for (int j = 0; j < signature.Length; j++)
                         {
