@@ -60,6 +60,22 @@ namespace ABSoftware
             this.Values.Add(Value);
         }
 
+        public bool TryGet<T>(int index, out T value)
+        {
+            T t;
+            try
+            {
+               t = (T)Values[index];
+            }
+            catch(Exception)
+            {
+                value = default(T);
+                return false;
+            }
+            value = t;
+            return true;
+        }
+
         public T Get<T>(int index)
         {
             return (T)Values[index];
