@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ABSoftware
 {
     public class KLIN
     {
         const string v = "1.0b";
-        string KLCODE;
         List<KLINToken> tokens = new List<KLINToken>();
 
         public KLIN()
@@ -17,39 +13,33 @@ namespace ABSoftware
 
         }
 
-        public void Add(string Property, object value)
+        public void Add(string PropertyName, object Value)
         {
-            KLINToken kt = new KLINToken();
-            kt.Property = Property;
-            kt.value = value;
-            tokens.Add(kt);
+            tokens.Add(new KLINToken(PropertyName, Value));
         }
 
-        public void Parse(string KLIN)
+        public void Parse(string klin)
         {
-            KLCODE = KLIN;
-            if (KLIN.Length < 3)
+            if (klin.Length < 3)
                 return;
-            string[] Lines = KLIN.Split('\n');
-            for(int i = 0; i < Lines.Length; i++)
+            string[] Lines = klin.Split('\n');
+            for (int i = 0; i < Lines.Length; i++)
             {
-                if(Lines[i][0] != '#') //# MEANS COMMENT
+                if (Lines[i][0] != '#') //# MEANS COMMENT
                 {
-                    KLINToken kt = new KLINToken();
-                    kt.Property = Lines[i].Split('=')[0];
-                    kt.value = Lines[i].Split(new char[] { '=' }, 2)[1];
+                    KLINToken kt = new KLINToken(Lines[i].Split('=')[0], Lines[i].Split(new char[] { '=' }, 2)[1]);
                     tokens.Add(kt);
                 }
             }
         }
 
-        public object Get(string Property)
+        public object Get(string PropertyName)
         {
-            for(int i = 0; i < tokens.Count; i++)
+            for (int i = 0; i < tokens.Count; i++)
             {
-                if(tokens[i].Property == Property)
+                if (tokens[i].PropertyName == PropertyName)
                 {
-                    return tokens[i].value;
+                    return tokens[i].Value;
                 }
             }
             return null;
@@ -58,100 +48,27 @@ namespace ABSoftware
         public string[] GetProperties()
         {
             string[] s = new string[tokens.Count];
-            for(int i = 0; i < s.Length; i++)
+            for (int i = 0; i < s.Length; i++)
             {
-                s[i] = tokens[i].Property;
+                s[i] = tokens[i].PropertyName;
             }
             return s;
         }
-        
+
         public override string ToString()
         {
-            string KLIN = $"#KLIN version {v}\n";
-            for(int i = 0; i < tokens.Count; i++)
+            string klin = $"#KLIN version {v}\n";
+            for (int i = 0; i < tokens.Count; i++)
             {
-                KLIN += $"{tokens[i].Property}={tokens[i].value}\n";
+                klin += $"{tokens[i].PropertyName}={tokens[i].Value}\n";
             }
-            KLIN += "#END";
-            return KLIN;
+            klin += "#END";
+            return klin;
         }
 
         public void Dispose()
         {
-            KLCODE = "";
             tokens.Clear();
-        }
-
-        public class Convertation
-        {
-            //CONVERT↓
-
-            public static string GetValue(string[] array)
-            {
-                string ret = "[\"";
-                for(int i = 0; i < array.Length; i++)
-                {
-                    if (i + 1 != array.Length && i + 1 < array.Length)
-                    {
-                        ret += $"{array[i]}\", \"";
-                    }
-                    else
-                    {
-                        ret += $"{array[i]}";
-                    }
-                }
-                ret += "\"]";
-                return ret;
-            }
-
-            public static string GetValue(int[] array)
-            {
-                string ret = "[";
-                for (int i = 0; i < array.Length; i++)
-                {
-                    if (i + 1 != array.Length && i + 1 < array.Length)
-                    {
-                        ret += $"{array[i]}, ";
-                    }
-                    else
-                    {
-                        ret += $"{array[i]}";
-                    }
-                }
-                ret += "]";
-                return ret;
-            }
-
-            //GET↓
-
-            public static string[] GetStrings(string KLINArray)
-            {
-                List<string> array = new List<string>();
-                for (int i = 1; i < KLINArray.Split(new char[] { '\"', '\"' }, StringSplitOptions.RemoveEmptyEntries).Length; i += 2)
-                {
-                    array.Add(KLINArray.Split(new char[] { '\"', '\"' }, StringSplitOptions.RemoveEmptyEntries)[i]);
-                }
-                return array.ToArray();
-            }
-
-            public static int[] GetInts(string KLINArray)
-            {
-                List<int> array = new List<int>();
-                int count = KLINArray.Split(',').Length + 1;
-                string splits = KLINArray.Split(new char[] { '[', ']' })[1];
-                if(count == 1)
-                {
-                    array.Add(int.Parse(KLINArray.Split(new char[] { '[', ']' })[1]));
-                }
-                else
-                {
-                    for(int i = 0; i < count - 1; i++)
-                    {
-                        array.Add(int.Parse(splits.Split(',')[i]));
-                    }
-                }
-                return array.ToArray();
-            }
         }
     }
 }
