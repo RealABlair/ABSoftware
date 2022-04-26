@@ -35,6 +35,7 @@ namespace ABSoftware
                 string currObject = objects[i];
                 if(currObject.Contains("\""))
                 {
+                    currObject = currObject.Replace(" ", "");
                     Values.Add(currObject.Split(new char[] { '\"', '\"' }, StringSplitOptions.RemoveEmptyEntries)[0]);
                     continue;
                 }
@@ -74,7 +75,7 @@ namespace ABSoftware
             string klinArray = "[";
             for(int i = 0; i < Values.Count; i++)
             {
-                if(Values[i].GetType().Equals(typeof(string)))
+                if(Values[i].GetType().Equals(typeof(String)))
                     klinArray += "\"" + Values[i] + "\"";   
                 else
                     klinArray += Values[i].ToString().Replace(",", ".");
@@ -85,5 +86,8 @@ namespace ABSoftware
             klinArray += "]";
             return klinArray;
         }
+
+        #region Utils
+        #endregion
     }
 }
