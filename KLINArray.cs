@@ -5,7 +5,7 @@ namespace ABSoftware
 {
     public class KLINArray
     {
-        public List<object> Values = new List<object>();
+        List<object> Values = new List<object>();
 
         public int Count { get { return Values.Count; } }
 
