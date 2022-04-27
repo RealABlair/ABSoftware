@@ -98,7 +98,6 @@ namespace ABSoftware
             string klinArray = "[";
             for(int i = 0; i < Values.Count; i++)
             {
-                Console.WriteLine(Values[i].GetType().Name);
                 if(Values[i].GetType().Equals(typeof(String)))
                     klinArray += "\"" + Values[i] + "\"";   
                 else
