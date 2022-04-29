@@ -20,6 +20,12 @@ namespace ABSoftware
             this.Values = new List<object>(objects);
         }
 
+        public object this[int id]
+        {
+            get { return Values[id]; }
+            set { Values[id] = value; }
+        }
+
         public bool Parse(string klin)
         {
             if (klin == null || !(klin.Contains("[") || klin.Contains("]")))
