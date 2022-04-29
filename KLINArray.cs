@@ -78,7 +78,7 @@ namespace ABSoftware
             T t;
             try
             {
-               t = (T)Values[index];
+               t = (T)Convert.ChangeType(Values[index], typeof(T));
             }
             catch(Exception)
             {
@@ -91,7 +91,7 @@ namespace ABSoftware
 
         public T Get<T>(int index)
         {
-            return (T)Values[index];
+            return (T)Convert.ChangeType(Values[index], typeof(T));
         }
 
         public object Get(int index)
