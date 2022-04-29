@@ -94,6 +94,11 @@ namespace ABSoftware
             return (T)Values[index];
         }
 
+        public object Get(int index)
+        {
+            return Values[index];
+        }
+
         public void Dispose()
         {
             Values.Clear();
