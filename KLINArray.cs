@@ -7,7 +7,7 @@ namespace ABSoftware
     {
         List<object> Values = new List<object>();
 
-        public int Count { get { return Values.Count; } }
+        public int Size { get { return Values.Count; } }
 
         public KLINArray(string klin = null)
         {
@@ -36,10 +36,10 @@ namespace ABSoftware
             string splitKlin = klin.Split(new char[] { '[', ']' })[1];
             string[] objects = splitKlin.Split(',');
 
-            for(int i = 0; i < objects.Length; i++)
+            for (int i = 0; i < objects.Length; i++)
             {
                 string currObject = objects[i];
-                if(currObject.Contains("\""))
+                if (currObject.Contains("\""))
                 {
                     currObject = currObject.Replace(" ", "");
                     Values.Add(currObject.Split(new char[] { '\"', '\"' }, StringSplitOptions.RemoveEmptyEntries)[0]);
@@ -47,7 +47,7 @@ namespace ABSoftware
                 }
 
                 string currObjectLower = currObject.ToLower();
-                if(currObjectLower.Contains("false") || currObjectLower.Contains("true"))
+                if (currObjectLower.Contains("false") || currObjectLower.Contains("true"))
                 {
                     Values.Add(bool.Parse(currObject));
                     continue;
@@ -78,9 +78,9 @@ namespace ABSoftware
             T t;
             try
             {
-               t = (T)Convert.ChangeType(Values[index], typeof(T));
+                t = (T)Convert.ChangeType(Values[index], typeof(T));
             }
-            catch(Exception)
+            catch (Exception)
             {
                 value = default(T);
                 return false;
@@ -107,10 +107,10 @@ namespace ABSoftware
         public override string ToString()
         {
             string klinArray = "[";
-            for(int i = 0; i < Values.Count; i++)
+            for (int i = 0; i < Values.Count; i++)
             {
-                if(Values[i].GetType().Equals(typeof(String)))
-                    klinArray += "\"" + Values[i] + "\"";   
+                if (Values[i].GetType().Equals(typeof(String)))
+                    klinArray += "\"" + Values[i] + "\"";
                 else
                     klinArray += Values[i].ToString().Replace(",", ".");
 
