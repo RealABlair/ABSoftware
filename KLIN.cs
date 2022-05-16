@@ -33,6 +33,11 @@ namespace ABSoftware
             }
         }
 
+        public object this[string PropertyName]
+        {
+            get { return Get(PropertyName); }
+        }
+
         public object Get(string PropertyName)
         {
             for (int i = 0; i < tokens.Count; i++)
