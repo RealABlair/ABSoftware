@@ -7,7 +7,7 @@ namespace ABSoftware
         byte[] data = null;
 
         public int Size { get { return data.Length; } }
-        public int LastIndex { get { return data.Length-1; } }
+        public int LastIndex { get { return data.Length - 1; } }
 
         #region Constructors
         public ByteBuilder()
@@ -33,6 +33,16 @@ namespace ABSoftware
             Buffer.BlockCopy(data, 0, this.data, dataLength, data.Length);
         }
 
+        public void Append(params byte[][] data)
+        {
+            for(int i = 0; i < data.Length; i++)
+            {
+                int dataLength = this.data.Length;
+                Array.Resize(ref this.data, this.data.Length + data[i].Length);
+                Buffer.BlockCopy(data[i], 0, this.data, dataLength, data[i].Length);
+            }
+        }
+
         public void Append(int startIndex, byte[] data)
         {
             int dataLength = this.data.Length;
@@ -44,7 +54,7 @@ namespace ABSoftware
 
         public void Fill(int startIndex, int endIndex, byte data)
         {
-            byte[] array = new byte[endIndex-startIndex+1];
+            byte[] array = new byte[endIndex - startIndex + 1];
             for (int i = 0; i < array.Length; i++) array[i] = data;
             Buffer.BlockCopy(array, 0, this.data, startIndex, array.Length);
         }
@@ -101,7 +111,7 @@ namespace ABSoftware
         {
             if (array.Length > this.data.Length)
                 return -1;
-            for (int i = 0; i < this.data.Length - array.Length+1; i++)
+            for (int i = 0; i < this.data.Length - array.Length + 1; i++)
             {
                 bool found = true;
                 for (int j = 0; j < array.Length; j++)
@@ -132,9 +142,9 @@ namespace ABSoftware
         {
             int startIndex = this.data.Length - array.Length;
             int num = 0;
-            for(int i = 0; i < array.Length; i++)
+            for (int i = 0; i < array.Length; i++)
             {
-                if (this.data[startIndex+i] == array[i])
+                if (this.data[startIndex + i] == array[i])
                 {
                     num++;
                     if (num.Equals(array.Length))
@@ -166,9 +176,9 @@ namespace ABSoftware
         public override string ToString()
         {
             string text = "";
-            for(int i = 0; i < this.data.Length; i++)
+            for (int i = 0; i < this.data.Length; i++)
             {
-                if (i < this.data.Length-1)
+                if (i < this.data.Length - 1)
                     text += $"{data[i].ToString("X2")} ";
                 else
                     text += $"{data[i].ToString("X2")}";
