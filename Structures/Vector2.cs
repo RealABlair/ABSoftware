@@ -32,6 +32,27 @@ namespace ABSoftware.Structures
             float l = Length();
             return new Vector2(x / l, y / l);
         }
+        
+        public Vector2 Intersection(Vector2 a0, Vector2 a1, Vector2 b0, Vector2 b1)
+        {
+            float n;
+            if (a1.y - a0.y != 0)
+            {
+                float q = (a1.x - a0.x) / (a0.y - a1.y);
+                float sn = (b0.x - b1.x) + (b0.y - b1.y) * q;
+                if (sn == 0f)
+                    return Zero;
+                float fn = (b0.x - a0.x) + (b0.y - a0.x) * q;
+                n = fn / sn;
+            }
+            else
+            {
+                if (b0.y - b1.y == 0f)
+                    return Zero;
+                n = (b0.y - a0.y) / (b0.y - b1.y);
+            }
+            return new Vector2((b0.x + (b1.x - b0.x) * n), ((b0.y + (b1.y - b0.y) * n)));
+        }
 
         public float[] GetRotations(Vector2 to)
         {
