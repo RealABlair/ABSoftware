@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ABSoftware
 {
@@ -104,10 +100,25 @@ namespace ABSoftware
         {
             return start * (1 - t) + end * t;
         }
-        
+
         public static float InvLerp(float start, float end, float val)
         {
             return (val - start) / (end - start);
+        }
+
+        public static void AddBit(ref int value, int bit)
+        {
+            value |= 1 << bit;
+        }
+
+        public static void RemoveBit(ref int value, int bit)
+        {
+            value &= ~(1 << bit);
+        }
+
+        public static bool HasBit(int value, int bit)
+        {
+            return (value & 1 << bit) != 0;
         }
 
         public static float WrapAngleTo180(float value)
@@ -126,7 +137,7 @@ namespace ABSoftware
 
             return value;
         }
-        
+
         public static double WrapAngleTo180(double value)
         {
             value = value % 360.0;
@@ -143,7 +154,7 @@ namespace ABSoftware
 
             return value;
         }
-        
+
         public class Random
         {
             static System.Random rnd = new System.Random();
