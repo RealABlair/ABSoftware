@@ -68,6 +68,11 @@ namespace ABSoftware.Structures
             y = (int)y;
         }
 
+        public Vector2 Copy()
+        {
+            return new Vector2(x, y);
+        }
+
         #region Operators
         #region Vectors
         public static Vector2 operator +(Vector2 a, Vector2 b)
