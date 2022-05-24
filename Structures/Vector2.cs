@@ -33,7 +33,7 @@ namespace ABSoftware.Structures
             return new Vector2(x / l, y / l);
         }
         
-        public Vector2 Intersection(Vector2 a0, Vector2 a1, Vector2 b0, Vector2 b1)
+        public static Vector2 Intersection(Vector2 a0, Vector2 a1, Vector2 b0, Vector2 b1)
         {
             float n;
             if (a1.y - a0.y != 0)
