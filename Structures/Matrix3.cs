@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace ABSoftware.Structures
 {
@@ -54,45 +54,35 @@ namespace ABSoftware.Structures
         public Matrix3 Identity_M()
         {
             Matrix3 ma = new Matrix3();
-            ma.m[0, 0] = 1.0f; ma.m[1, 0] = 0.0f; ma.m[2, 0] = 0.0f;
-            ma.m[0, 1] = 0.0f; ma.m[1, 1] = 1.0f; ma.m[2, 1] = 0.0f;
-            ma.m[0, 2] = 0.0f; ma.m[1, 2] = 0.0f; ma.m[2, 2] = 1.0f;
+            ma.Identity();
             return ma;
         }
 
         public Matrix3 Translate_M(float x, float y)
         {
             Matrix3 ma = new Matrix3();
-            ma.m[0, 0] = 1.0f; ma.m[1, 0] = 0.0f; ma.m[2, 0] = x;
-            ma.m[0, 1] = 0.0f; ma.m[1, 1] = 1.0f; ma.m[2, 1] = y;
-            ma.m[0, 2] = 0.0f; ma.m[1, 2] = 0.0f; ma.m[2, 2] = 1.0f;
+            ma.Translate(x, y);
             return ma;
         }
 
         public Matrix3 Rotate_M(float RadAngle)
         {
             Matrix3 ma = new Matrix3();
-            ma.m[0, 0] = (float)Math.Cos(RadAngle); ma.m[1, 0] = (float)Math.Sin(RadAngle); ma.m[2, 0] = 0.0f;
-            ma.m[0, 1] = -(float)Math.Sin(RadAngle); ma.m[1, 1] = (float)Math.Cos(RadAngle); ma.m[2, 1] = 0.0f;
-            ma.m[0, 2] = 0.0f; ma.m[1, 2] = 0.0f; ma.m[2, 2] = 1.0f;
+            ma.Rotate(RadAngle);
             return ma;
         }
 
         public Matrix3 Scale_M(float x, float y)
         {
             Matrix3 ma = new Matrix3();
-            ma.m[0, 0] = x; ma.m[1, 0] = 0.0f; ma.m[2, 0] = 0.0f;
-            ma.m[0, 1] = 0.0f; ma.m[1, 1] = y; ma.m[2, 1] = 0.0f;
-            ma.m[0, 2] = 0.0f; ma.m[1, 2] = 0.0f; ma.m[2, 2] = 1.0f;
+            ma.Scale(x, y);
             return ma;
         }
 
         public Matrix3 Shear_M(float x, float y)
         {
             Matrix3 ma = new Matrix3();
-            ma.m[0, 0] = 1.0f; ma.m[1, 0] = x; ma.m[2, 0] = 0.0f;
-            ma.m[0, 1] = y; ma.m[1, 1] = 1.0f; ma.m[2, 1] = 0.0f;
-            ma.m[0, 2] = 0.0f; ma.m[1, 2] = 0.0f; ma.m[2, 2] = 1.0f;
+            ma.Shear(x, y);
             return ma;
         }
 
