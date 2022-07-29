@@ -14,7 +14,10 @@ namespace ABSoftware
         public static extern short GetKeyState(int nVirtKey);
 
         [DllImport("user32.dll")]
-        static extern void keybd_event(int nVirtKey, byte bScan, uint dwFlags, int dwExtraInfo);
+        static extern void keybd_event(int nVirtKey, uint bScan, uint dwFlags, int dwExtraInfo);
+        
+        [DllImport("user32.dll")]
+        public static extern uint MapVirtualKey(uint uCode, uint uMapType);
 
         static List<int> KEYS_CONSTS { get { return ScanKeysConsts(); } }
 
@@ -216,19 +219,19 @@ namespace ABSoftware
         public static uint KEYEVENTF_KEYUP = 0x0002;
         public static uint KEYEVENTF_EXTENDEDKEY = 0x0001;
 
-        public static void ExtendedKey(int VK_KEY)
+        public static void ExtendedKey(int VK_KEY, uint byteScan = 0x45)
         {
-            keybd_event(VK_KEY, 0x45, KEYEVENTF_EXTENDEDKEY, 0);
-        }
-        
-        public static void PressKey(int VK_KEY)
-        {
-            keybd_event(VK_KEY, 0x45, KEYEVENTF_KEYDOWN, 0);
+            keybd_event(VK_KEY, byteScan, KEYEVENTF_EXTENDEDKEY, 0);
         }
 
-        public static void ReleaseKey(int VK_KEY)
+        public static void PressKey(int VK_KEY, uint byteScan = 0x45)
         {
-            keybd_event(VK_KEY, 0x45, KEYEVENTF_KEYUP, 0);
+            keybd_event(VK_KEY, byteScan, KEYEVENTF_KEYDOWN, 0);
+        }
+
+        public static void ReleaseKey(int VK_KEY, uint byteScan = 0x45)
+        {
+            keybd_event(VK_KEY, byteScan, KEYEVENTF_KEYUP, 0);
         }
 
         public static void UpdateKeys()
