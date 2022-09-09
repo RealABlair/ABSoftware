@@ -168,15 +168,6 @@ namespace ABSoftware.Structures
             return newMat;
         }
 
-        public static Matrix3 operator /(Matrix3 a, Matrix3 b)
-        {
-            Matrix3 newMat = new Matrix3();
-            for (int c = 0; c < 3; c++)
-                for (int r = 0; r < 3; r++)
-                    newMat.m[c, r] = a.m[0, r] * b.m[c, 0] + a.m[1, r] * b.m[c, 1] + a.m[2, r] * b.m[c, 2];
-            return newMat;
-        }
-
         public static Matrix3 operator %(Matrix3 a, Matrix3 b)
         {
             float[,] m = new float[3, 3];
