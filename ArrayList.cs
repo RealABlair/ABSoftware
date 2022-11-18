@@ -28,7 +28,7 @@ namespace ABSoftware
         {
             return elements[id];
         }
-        
+
         public T this[int id]
         {
             get { return elements[id]; }
@@ -62,10 +62,20 @@ namespace ABSoftware
         {
             elements = new T[0];
         }
-        
+
         public bool Contains(T element)
         {
             return elements.Contains(element);
+        }
+
+        public T FirstOrDefault(Func<T,bool> predicate)
+        {
+            for(int i = 0; i < Size; i++)
+            {
+                if (predicate.Invoke(elements[i]))
+                    return elements[i];
+            }
+            return default;
         }
     }
 }
