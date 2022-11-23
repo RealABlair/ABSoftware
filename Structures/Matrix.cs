@@ -14,6 +14,10 @@ namespace ABSoftware.Structures
             matrix = new float[Rows,Columns];
         }
 
+        /// <summary>
+        /// The "Rows" and "Columns" are inverted in this method
+        /// </summary>
+        /// <param name="matrix"></param>
         public Matrix(float[,] matrix)
         {
             int Rows = matrix.GetLength(1);
