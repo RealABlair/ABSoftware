@@ -77,5 +77,15 @@ namespace ABSoftware
             }
             return default;
         }
+        
+        public int FindIndex(Func<T,bool> predicate)
+        {
+            for(int i = 0; i < Size; i++)
+            {
+                if(predicate.Invoke(elements[i]))
+                    return elements[i];
+            }
+            return -1;
+        }
     }
 }
