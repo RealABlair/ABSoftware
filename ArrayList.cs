@@ -83,7 +83,7 @@ namespace ABSoftware
             for(int i = 0; i < Size; i++)
             {
                 if(predicate.Invoke(elements[i]))
-                    return elements[i];
+                    return i;
             }
             return -1;
         }
