@@ -100,6 +100,19 @@ namespace ABSoftware.Structures
             }
             return ret;
         }
+
+        public static Matrix operator *(Matrix a, float b)
+        {
+            Matrix ret = new Matrix(a.Rows, a.Columns);
+            for (int c = 0; c < ret.Columns; c++)
+            {
+                for (int r = 0; r < ret.Rows; r++)
+                {
+                    ret[r, c] = a[r, c] * b;
+                }
+            }
+            return ret;
+        }
         #endregion
     }
 }
