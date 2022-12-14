@@ -1,0 +1,184 @@
+using System;
+
+namespace ABSoftware
+{
+    public class BitBuilder
+    {
+        bool[] array = null;
+
+        public int Size { get => array.Length; }
+        public int LastIndex { get => Size - 1; }
+        public bool[] Array { get => this.array; }
+
+        public BitBuilder()
+        {
+            array = new bool[0];
+        }
+
+        public BitBuilder(int length)
+        {
+            array = new bool[length];
+        }
+
+        public BitBuilder(int length, bool fillWith)
+        {
+            array = new bool[length];
+            for (int i = 0; i < array.Length; i++)
+                array[i] = fillWith;
+        }
+
+        public BitBuilder(bool[] values)
+        {
+            array = values;
+        }
+
+        public BitBuilder(byte[] values, bool pushBack = true)
+        {
+            if(pushBack)
+            {
+                array = new bool[values.Length * 8];
+                for (int i = 0; i < values.Length; i++)
+                    for (int j = 7; j >= 0; j--)
+                    {
+                        array[(values.Length - 1 - i) * 8 + j] = (values[i] & 1 << j) != 0;
+                    }
+            }
+            else
+            {
+                array = new bool[values.Length * 8];
+                for (int i = 0; i < values.Length; i++)
+                    for (int j = 0; j < 8; j++)
+                    {
+                        array[i * 8 + j] = (values[i] & 1 << j) != 0;
+                    }
+            }
+        }
+
+        public bool this[int id]
+        {
+            get => array[id];
+            set => array[id] = value;
+        }
+
+        public bool Get(int id)
+        {
+            return array[id];
+        }
+
+        public bool[] GetRange(int startIndex, int length)
+        {
+            bool[] data = new bool[length];
+            Buffer.BlockCopy(this.array, startIndex, data, 0, length);
+            return data;
+        }
+
+        public sbyte GetSByte(int startIndex)
+        {
+            sbyte value = 0;
+            for (int i = 0; i < 8; i++)
+                value |= (sbyte)((array[startIndex + i] ? 1 : 0) << i);
+            return value;
+        }
+
+        public byte GetByte(int startIndex)
+        {
+            byte value = 0;
+            for (int i = 0; i < 8; i++)
+                value |= (byte)((array[startIndex + i] ? 1 : 0) << i);
+            return value;
+        }
+
+        public short GetShort(int startIndex)
+        {
+            short value = 0;
+            for (int i = 0; i < 16; i++)
+                value |= (short)(1 << (array[startIndex + i] ? 1 : 0));
+            return value;
+        }
+
+        public ushort GetUShort(int startIndex)
+        {
+            ushort value = 0;
+            for (int i = 0; i < 16; i++)
+                value |= (ushort)(1 << (array[startIndex + i] ? 1 : 0));
+            return value;
+        }
+
+        public int GetInt(int startIndex)
+        {
+            int value = 0;
+            for (int i = 0; i < 32; i++)
+                value |= 1 << (array[startIndex + i] ? 1 : 0);
+            return value;
+        }
+
+        public uint GetUInt(int startIndex)
+        {
+            uint value = 0;
+            for (int i = 0; i < 32; i++)
+                value |= (uint)(1 << (array[startIndex + i] ? 1 : 0));
+            return value;
+        }
+
+        public long GetLong(int startIndex)
+        {
+            long value = 0;
+            for (int i = 0; i < 64; i++)
+                value |= (long)(1 << (array[startIndex + i] ? 1 : 0));
+            return value;
+        }
+
+        public ulong GetULong(int startIndex)
+        {
+            ulong value = 0;
+            for (int i = 0; i < 64; i++)
+                value |= (uint)(1 << (array[startIndex + i] ? 1 : 0));
+            return value;
+        }
+
+        public void Set(int id, bool value)
+        {
+            array[id] = value;
+        }
+
+        public override string ToString()
+        {
+            string s = "";
+            for(int i = 0; i < Size; i++)
+            {
+                s += (array[i] ? "1" : "0");
+            }
+            return s;
+        }
+
+        public string ToStringReversed()
+        {
+            string s = "";
+            for (int i = Size - 1; i >= 0; i--)
+            {
+                s += (array[i] ? "1" : "0");
+            }
+            return s;
+        }
+
+        public static string ToString(bool[] array)
+        {
+            string s = "";
+            for (int i = 0; i < array.Length; i++)
+            {
+                s += (array[i] ? "1" : "0");
+            }
+            return s;
+        }
+
+        public static string ToStringReversed(bool[] array)
+        {
+            string s = "";
+            for (int i = array.Length - 1; i >= 0; i--)
+            {
+                s += (array[i] ? "1" : "0");
+            }
+            return s;
+        }
+    }
+}
