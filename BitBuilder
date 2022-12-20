@@ -72,67 +72,67 @@ namespace ABSoftware
             return data;
         }
 
-        public sbyte GetSByte(int startIndex)
+        public sbyte GetSByte(int startIndex, bool reversed = false)
         {
             sbyte value = 0;
             for (int i = 0; i < 8; i++)
-                value |= (sbyte)((array[startIndex + i] ? 1 : 0) << i);
+                value |= (sbyte)((array[(reversed) ? LastIndex - startIndex - i : startIndex + i] ? 1 : 0) << ((reversed) ? 7 - i : i));
             return value;
         }
 
-        public byte GetByte(int startIndex)
+        public byte GetByte(int startIndex, bool reversed = false)
         {
             byte value = 0;
             for (int i = 0; i < 8; i++)
-                value |= (byte)((array[startIndex + i] ? 1 : 0) << i);
+                value |= (byte)((array[(reversed) ? LastIndex - startIndex - i : startIndex + i] ? 1 : 0) << ((reversed) ? 7 - i : i));
             return value;
         }
 
-        public short GetShort(int startIndex)
+        public short GetShort(int startIndex, bool reversed = false)
         {
             short value = 0;
             for (int i = 0; i < 16; i++)
-                value |= (short)(1 << (array[startIndex + i] ? 1 : 0));
+                value |= (short)((array[(reversed) ? LastIndex - startIndex - i : startIndex + i] ? 1 : 0) << ((reversed) ? 15 - i : i));
             return value;
         }
 
-        public ushort GetUShort(int startIndex)
+        public ushort GetUShort(int startIndex, bool reversed = false)
         {
             ushort value = 0;
             for (int i = 0; i < 16; i++)
-                value |= (ushort)(1 << (array[startIndex + i] ? 1 : 0));
+                value |= (ushort)((array[(reversed) ? LastIndex - startIndex - i : startIndex + i] ? 1 : 0) << ((reversed) ? 15 - i : i));
             return value;
         }
 
-        public int GetInt(int startIndex)
+        public int GetInt(int startIndex, bool reversed = false)
         {
             int value = 0;
             for (int i = 0; i < 32; i++)
-                value |= 1 << (array[startIndex + i] ? 1 : 0);
+                value |= ((array[(reversed) ? LastIndex - startIndex - i : startIndex + i] ? 1 : 0) << ((reversed) ? 31 - i : i));
             return value;
         }
 
-        public uint GetUInt(int startIndex)
+        public uint GetUInt(int startIndex, bool reversed = false)
         {
             uint value = 0;
             for (int i = 0; i < 32; i++)
-                value |= (uint)(1 << (array[startIndex + i] ? 1 : 0));
+                value |= (uint)((array[(reversed) ? LastIndex - startIndex - i : startIndex + i] ? 1 : 0) << ((reversed) ? 31 - i : i));
             return value;
         }
 
-        public long GetLong(int startIndex)
+        public long GetLong(int startIndex, bool reversed = false)
         {
             long value = 0;
             for (int i = 0; i < 64; i++)
-                value |= (long)(1 << (array[startIndex + i] ? 1 : 0));
+                value |= (long)((array[(reversed) ? LastIndex - startIndex - i : startIndex + i] ? 1 : 0) << ((reversed) ? 63 - i : i));
             return value;
         }
 
-        public ulong GetULong(int startIndex)
+        public ulong GetULong(int startIndex, bool reversed = false)
         {
             ulong value = 0;
             for (int i = 0; i < 64; i++)
-                value |= (uint)(1 << (array[startIndex + i] ? 1 : 0));
+                value |= (uint)((array[(reversed) ? LastIndex - startIndex - i : startIndex + i] ? 1 : 0) << ((reversed) ? 63 - i : i));
             return value;
         }
 
