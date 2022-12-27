@@ -101,6 +101,23 @@ namespace ABSoftware
         public void Parse(string KLIN)
         {
             string[] Lines = KLIN.Split('\n');
+
+            string[] TrimLines(string[] lines)
+            {
+                string[] newLines = new string[0];
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    if (string.IsNullOrWhiteSpace(lines[i]) || string.IsNullOrEmpty(lines[i]))
+                        continue;
+
+                    Array.Resize(ref newLines, newLines.Length + 1);
+                    newLines[newLines.Length - 1] = lines[i];
+                }
+                return newLines;
+            }
+
+            Lines = TrimLines(Lines);
+
             if (!(Lines[0][0] == '(' && Lines[Lines.Length-1][0] == ')'))
                 return;
             bool subTokens = false;
@@ -109,7 +126,7 @@ namespace ABSoftware
             for (int i = 1; i < Lines.Length - 1; i++)
             {
                 string Line = Lines[i].Split(new char[] { '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)[0];
-                if (Line.Length < 1)
+                if (Line.Length < 1 || Line.Equals(string.Empty))
                     continue;
                 if (Line[0] == '#')
                 {
