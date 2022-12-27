@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 
 namespace ABSoftware
@@ -165,7 +165,7 @@ namespace ABSoftware
                 KLINToken token = this.tokens[i];
                 ToStringBuilder.Append(WriteHelper(ref token, ref indent));
             }
-            ToStringBuilder.AppendLine(")");
+            ToStringBuilder.Append(")");
             return ToStringBuilder.ToString();
         }
 
