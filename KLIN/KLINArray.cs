@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 
 namespace ABSoftware
@@ -61,13 +61,9 @@ namespace ABSoftware
                 {
                     Add(bool.Parse(entries[i]));
                 }
-                else if(entries[i].Contains("."))
-                {
-                    Add(float.Parse(entries[i].Replace(".", ",")));
-                }
                 else
                 {
-                    Add(int.Parse(entries[i]));
+                    Add(decimal.Parse(entries[i].Replace(".", ",")));
                 }
             }
         }
