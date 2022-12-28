@@ -25,6 +25,11 @@ namespace ABSoftware
         {
             return this.tokens;
         }
+        
+        public KLIN(string KLIN)
+        {
+            Parse(KLIN);
+        }
 
         public KLINToken this[int PropertyId]
         {
