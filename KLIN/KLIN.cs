@@ -28,6 +28,7 @@ namespace ABSoftware
         
         public KLIN(string KLIN)
         {
+            this.tokens = new KLINToken[0];
             Parse(KLIN);
         }
 
