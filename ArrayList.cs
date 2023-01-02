@@ -54,12 +54,6 @@ namespace ABSoftware
 
         public void RemoveAt(int id)
         {
-            //elements = elements.Where((source, index) => index != id).ToArray();
-            if (this.Size - 1 <= 0)
-            {
-                Clear();
-                return;
-            }
             Array.Copy(this.elements, id + 1, this.elements, id, this.Size - id - 1);
             Array.Resize(ref this.elements, this.Size - 1);
         }
