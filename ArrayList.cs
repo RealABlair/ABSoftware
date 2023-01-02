@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 
 namespace ABSoftware
 {
@@ -55,7 +54,14 @@ namespace ABSoftware
 
         public void RemoveAt(int id)
         {
-            elements = elements.Where((source, index) => index != id).ToArray();
+            //elements = elements.Where((source, index) => index != id).ToArray();
+            if (this.Size - 1 <= 0)
+            {
+                Clear();
+                return;
+            }
+            Array.Copy(this.elements, id + 1, this.elements, id, this.Size - id - 1);
+            Array.Resize(ref this.elements, this.Size - 1);
         }
 
         public void Clear()
@@ -65,24 +71,29 @@ namespace ABSoftware
 
         public bool Contains(T element)
         {
-            return elements.Contains(element);
+            for(int i = 0; i < elements.Length; i++)
+            {
+                if (elements[i].Equals(element))
+                    return true;
+            }
+            return false;
         }
 
-        public T FirstOrDefault(Func<T,bool> predicate)
+        public T FirstOrDefault(Func<T, bool> predicate)
         {
-            for(int i = 0; i < Size; i++)
+            for (int i = 0; i < Size; i++)
             {
                 if (predicate.Invoke(elements[i]))
                     return elements[i];
             }
             return default;
         }
-        
-        public int FindIndex(Func<T,bool> predicate)
+
+        public int FindIndex(Func<T, bool> predicate)
         {
-            for(int i = 0; i < Size; i++)
+            for (int i = 0; i < Size; i++)
             {
-                if(predicate.Invoke(elements[i]))
+                if (predicate.Invoke(elements[i]))
                     return i;
             }
             return -1;
