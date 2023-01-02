@@ -7,12 +7,11 @@ namespace ABSoftware.UI
     {
         public DraggableForm() : base()
         {
-            this.MouseDown += Drag;
             this.FormBorderStyle = FormBorderStyle.None;
             InitializeComponent();
         }
 
-        private void Drag(object sender, MouseEventArgs e)
+        protected override void OnMouseDown(MouseEventArgs e)
         {
             this.Capture = false;
             Message m = Message.Create(Handle, 0xa1, new IntPtr(2), IntPtr.Zero);
