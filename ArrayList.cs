@@ -65,7 +65,7 @@ namespace ABSoftware
 
         public bool Contains(T element)
         {
-            for(int i = 0; i < elements.Length; i++)
+            for (int i = 0; i < elements.Length; i++)
             {
                 if (elements[i].Equals(element))
                     return true;
@@ -91,6 +91,44 @@ namespace ABSoftware
                     return i;
             }
             return -1;
+        }
+
+        public void Sort(Func<T, T, int> comparison)
+        {
+            if (Size <= 1)
+                return;
+            for(int i = 0; i < Size; i++)
+            {
+                for (int j = i + 1; j < Size; j++)
+                {
+                    int sortingType = comparison.Invoke(elements[i], elements[j]);
+
+                    if (sortingType < -1)
+                        sortingType = -1;
+                    if (sortingType < -1)
+                        sortingType = -1;
+
+                    switch (sortingType)
+                    {
+                        case -1:
+                            {
+                                T buffer = elements[j - 1];
+                                elements[j - 1] = elements[i];
+                                elements[i] = buffer;
+                            }
+                            break;
+                        case 0:
+                            break;
+                        case 1:
+                            {
+                                T buffer = elements[j];
+                                elements[j] = elements[i];
+                                elements[i] = buffer;
+                            }
+                            break;
+                    }
+                }
+            }
         }
     }
 }
