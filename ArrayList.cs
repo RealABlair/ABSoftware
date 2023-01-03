@@ -112,8 +112,8 @@ namespace ABSoftware
                     {
                         case -1:
                             {
-                                T buffer = elements[j - 1];
-                                elements[j - 1] = elements[i];
+                                T buffer = elements[j];
+                                elements[j] = elements[i];
                                 elements[i] = buffer;
                             }
                             break;
@@ -121,9 +121,8 @@ namespace ABSoftware
                             break;
                         case 1:
                             {
-                                T buffer = elements[j];
-                                elements[j] = elements[i];
-                                elements[i] = buffer;
+                                elements[i] = elements[i];
+                                elements[j] = elements[j];
                             }
                             break;
                     }
