@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace ABSoftware
 {
@@ -35,6 +35,16 @@ namespace ABSoftware
         public double GetRandomDouble()
         {
             return (double)(GetRandom() / (double)uint.MaxValue);
+        }
+
+        public bool GetRandomBool()
+        {
+            return (GetRandom() >> 31) != 0; 
+        }
+
+        public bool GetRandomBool(float chance)
+        {
+            return !(GetRandomDouble() * 100 > chance);
         }
 
         public void RandomizeBytes(byte[] array)
