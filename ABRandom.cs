@@ -32,6 +32,11 @@ namespace ABSoftware
             return (int)(GetRandom() % (max - min)) + min;
         }
 
+        public uint GetRandomUInt(uint min = 0, uint max = uint.MaxValue)
+        {
+            return (GetRandom() % (max - min)) + min;
+        }
+
         public double GetRandomDouble()
         {
             return (double)(GetRandom() / (double)uint.MaxValue);
@@ -39,7 +44,7 @@ namespace ABSoftware
 
         public bool GetRandomBool()
         {
-            return (GetRandom() >> 31) != 0; 
+            return (GetRandom() >> 31) != 0;
         }
 
         public bool GetRandomBool(float chance)
@@ -49,7 +54,7 @@ namespace ABSoftware
 
         public void RandomizeBytes(byte[] array)
         {
-            for(int i = 0; i < array.Length; i++)
+            for (int i = 0; i < array.Length; i++)
             {
                 array[i] = (byte)(GetRandom() % 256);
             }
