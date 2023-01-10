@@ -35,7 +35,7 @@ namespace ABSoftware
 
         public void Append(params byte[][] data)
         {
-            for(int i = 0; i < data.Length; i++)
+            for (int i = 0; i < data.Length; i++)
             {
                 int dataLength = this.data.Length;
                 Array.Resize(ref this.data, this.data.Length + data[i].Length);
@@ -136,6 +136,18 @@ namespace ABSoftware
             byte[] newArray = new byte[data.Length - count];
             Buffer.BlockCopy(oldArray, count, newArray, 0, data.Length - count);
             this.data = newArray;
+        }
+
+        public void RemoveAt(int index)
+        {
+            Array.Copy(this.data, index + 1, this.data, index, this.Size - index - 1);
+            Array.Resize(ref this.data, this.Size - 1);
+        }
+
+        public void Remove(int startIndex, int length)
+        {
+            Array.Copy(this.data, startIndex+length, this.data, startIndex, this.Size - startIndex - length);
+            Array.Resize(ref this.data, this.Size - length);
         }
 
         public bool EndsWith(byte[] array)
