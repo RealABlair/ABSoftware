@@ -93,11 +93,18 @@ namespace ABSoftware
             return -1;
         }
 
+        public ArrayList<T> Copy()
+        {
+            ArrayList<T> newList = new ArrayList<T>();
+            Array.Copy(elements, 0, newList.elements, 0, Size);
+            return newList;
+        }
+
         public void Sort(Func<T, T, int> comparison)
         {
             if (Size <= 1)
                 return;
-            for(int i = 0; i < Size; i++)
+            for (int i = 0; i < Size; i++)
             {
                 for (int j = i + 1; j < Size; j++)
                 {
