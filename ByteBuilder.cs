@@ -73,7 +73,9 @@ namespace ABSoftware
 
         public byte[] ToArray()
         {
-            return this.data;
+            byte[] copy = new byte[this.data.Length];
+            Array.Copy(this.data, 0, copy, 0, this.data.Length);
+            return copy;
         }
 
         public bool Contains(byte[] array)
