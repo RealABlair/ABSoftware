@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 
 namespace ABSoftware
@@ -46,26 +46,75 @@ namespace ABSoftware
 
         public void Parse(string KLIN)
         {
-            KLIN = KLIN.Split(new char[] { '[', ']' }, StringSplitOptions.RemoveEmptyEntries)[0].Replace(", ", ",");
-            string[] entries = KLIN.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+            if (KLIN.Length > 0 && KLIN[0] != '[')
+                return;
+            bool readingToken = true;
+            bool isInQuotes = false;
 
-            Clear();
-
-            for(int i = 0; i < entries.Length; i++)
+            string token = "";
+            
+            for(int i = 1; i < KLIN.Length; i++)
             {
-                if(entries[i].Contains("\""))
+                if (KLIN[i] == ']')
                 {
-                    Add(entries[i].Split(new char[] { '\"' }, StringSplitOptions.RemoveEmptyEntries)[0]);
+                    if(token.Length > 0)
+                    {
+                        if (isInQuotes)
+                            Add(token);
+                        else
+                            Add(GetTokenType(token));
+                    }
+                    break;
                 }
-                else if(entries[i].ToLower().Contains("true") || entries[i].ToLower().Contains("false"))
+
+                if (!isInQuotes && KLIN[i] == ' ')
+                    continue;
+
+                if(KLIN[i] == '"')
                 {
-                    Add(bool.Parse(entries[i]));
+                    if (isInQuotes && KLIN[i + 1] == ',')
+                    {
+                        Add(token);
+                        token = "";
+                        isInQuotes = false;
+                        readingToken = true;
+                    }
+                    else
+                        isInQuotes = true;
+                    continue;
                 }
-                else
+
+                if (!readingToken && KLIN[i] != ',' && KLIN[i] != ' ')
+                    readingToken = true;
+
+                if(!isInQuotes && KLIN[i] == ',')
                 {
-                    Add(decimal.Parse(entries[i].Replace(".", ",")));
+                    readingToken = false;
+                }
+
+                if(readingToken)
+                {
+                    token += KLIN[i];
+                }
+                else if(token.Length > 0)
+                {
+                    Add(GetTokenType(token));
+                    token = "";
+                    readingToken = true;
                 }
             }
+        }
+
+        private object GetTokenType(string token)
+        {
+            if (token[0] == 'u')
+                return ulong.Parse(token.Substring(1));
+            if (token.Contains("."))
+                return double.Parse(token.Replace('.', ','));
+            if (token.ToLower() == "true" || token.ToLower() == "false")
+                return bool.Parse(token);
+
+            return long.Parse(token);
         }
 
         private readonly StringBuilder ToStringBuilder = new StringBuilder();
@@ -73,9 +122,9 @@ namespace ABSoftware
         {
             ToStringBuilder.Clear();
             ToStringBuilder.Append('[');
-            for(int i = 0; i < array.Length; i++)
+            for (int i = 0; i < array.Length; i++)
             {
-                if(array[i].GetType().Equals(typeof(String)))
+                if (array[i].GetType().Equals(typeof(String)))
                 {
                     ToStringBuilder.Append("\"" + array[i] + "\"");
                 }
