@@ -44,6 +44,7 @@ namespace ABSoftware
             this.array = new object[0];
         }
 
+        private readonly StringBuilder ParseBuilder = new StringBuilder();
         public void Parse(string KLIN)
         {
             Clear();
@@ -52,18 +53,18 @@ namespace ABSoftware
             bool readingToken = true;
             bool isInQuotes = false;
 
-            string token = "";
+            ParseBuilder.Clear();
             
             for(int i = 1; i < KLIN.Length; i++)
             {
                 if (KLIN[i] == ']')
                 {
-                    if(token.Length > 0)
+                    if(ParseBuilder.Length > 0)
                     {
                         if (isInQuotes)
-                            Add(token);
+                            Add(ParseBuilder.ToString());
                         else
-                            Add(GetTokenType(token));
+                            Add(GetTokenType(ParseBuilder.ToString()));
                     }
                     break;
                 }
@@ -75,8 +76,8 @@ namespace ABSoftware
                 {
                     if (isInQuotes && KLIN[i + 1] == ',')
                     {
-                        Add(token);
-                        token = "";
+                        Add(ParseBuilder.ToString());
+                        ParseBuilder.Clear();
                         isInQuotes = false;
                         readingToken = true;
                     }
@@ -95,12 +96,12 @@ namespace ABSoftware
 
                 if(readingToken)
                 {
-                    token += KLIN[i];
+                    ParseBuilder.Append(KLIN[i]);
                 }
-                else if(token.Length > 0)
+                else if(ParseBuilder.Length > 0)
                 {
-                    Add(GetTokenType(token));
-                    token = "";
+                    Add(GetTokenType(ParseBuilder.ToString()));
+                    ParseBuilder.Clear();
                     readingToken = true;
                 }
             }
