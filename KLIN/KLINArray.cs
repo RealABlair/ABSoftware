@@ -46,6 +46,7 @@ namespace ABSoftware
 
         public void Parse(string KLIN)
         {
+            Clear();
             if (KLIN.Length > 0 && KLIN[0] != '[')
                 return;
             bool readingToken = true;
@@ -124,13 +125,17 @@ namespace ABSoftware
             ToStringBuilder.Append('[');
             for (int i = 0; i < array.Length; i++)
             {
-                if (array[i].GetType().Equals(typeof(String)))
+                Type type = array[i].GetType();
+                if (type.Equals(typeof(string)))
                 {
                     ToStringBuilder.Append("\"" + array[i] + "\"");
                 }
                 else
                 {
-                    ToStringBuilder.Append(array[i].ToString().Replace(",", "."));
+                    if(type.Name.ToLower()[0] == 'u')
+                        ToStringBuilder.Append(array[i].ToString().Replace(",", ".").Insert(0, "u"));
+                    else
+                        ToStringBuilder.Append(array[i].ToString().Replace(",", "."));
                 }
 
                 if (i + 1 < array.Length)
