@@ -58,6 +58,15 @@ namespace ABSoftware
             Array.Resize(ref this.elements, this.Size - 1);
         }
 
+        public void RemoveIf(Func<T, bool> predicate)
+        {
+            for(int i = 0; i < Size; i++)
+            {
+                if (predicate.Invoke(elements[i]))
+                    Remove(elements[i]);
+            }
+        }
+
         public void Clear()
         {
             elements = new T[0];
