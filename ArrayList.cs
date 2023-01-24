@@ -69,7 +69,7 @@ namespace ABSoftware
 
         public void Clear()
         {
-            elements = new T[0];
+            Array.Clear(this.elements, 0, Size);
         }
 
         public bool Contains(T element)
