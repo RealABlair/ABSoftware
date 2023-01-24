@@ -113,17 +113,17 @@ namespace ABSoftware
 
         // VirtualQueryEx
         [DllImport("kernel32.dll")]
-        static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength);
+        public static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength);
 
         [DllImport("kernel32.dll")]
-        static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, ulong dwLength);
+        public static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, ulong dwLength);
 
         [DllImport("kernel32.dll")]
-        static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION64 lpBuffer, ulong dwLength);
+        public static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION64 lpBuffer, ulong dwLength);
 
         // VirtualFreeEx
         [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
-        static extern bool VirtualFreeEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, FreeType dwFreeType);
+        public static extern bool VirtualFreeEx(IntPtr hProcess, IntPtr lpAddress, uint dwSize, FreeType dwFreeType);
 
         // VirtualAllocEx
         [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
@@ -902,6 +902,29 @@ namespace ABSoftware
             return false;
         }
 
+        public T Read<T>(long address)
+        {
+            Type type = typeof(T);
+            byte[] data;
+            int size = Marshal.SizeOf(default(T));
+            if (!ReadByteArray(address, size, out data))
+                return default(T);
+
+            if (type == typeof(sbyte)) return (T)(object)(sbyte)data[0];
+            if (type == typeof(byte)) return (T)(object)data[0];
+            if (type == typeof(short)) return (T)(object)(short)(data[1] << 8 | data[0]);
+            if (type == typeof(ushort)) return (T)(object)(ushort)(data[1] << 8 | data[0]);
+            if (type == typeof(int)) return (T)(object)(int)(data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0]);
+            if (type == typeof(uint)) return (T)(object)(uint)(data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0]);
+            if (type == typeof(long)) return (T)(object)(long)(data[7] << 56 | data[6] << 48 | data[5] << 40 | data[4] << 32 | data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0]);
+            if (type == typeof(ulong)) return (T)(object)(ulong)(data[7] << 56 | data[6] << 48 | data[5] << 40 | data[4] << 32 | data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0]);
+
+            if (type == typeof(float)) return (T)(object)BitConverter.ToSingle(data, 0);
+            if (type == typeof(double)) return (T)(object)BitConverter.ToDouble(data, 0);
+
+            return default(T);
+        }
+
         public bool ReadByte(long address, out byte value)
         {
             byte[] buffer = new byte[(int)BufferType.Byte];
@@ -990,8 +1013,26 @@ namespace ABSoftware
         public bool Write(long address, byte[] bytes)
         {
             IntPtr IpAddress = (IntPtr)address;
-            IntPtr outTrash = IntPtr.Zero;
+            IntPtr outTrash;
             return WriteProcessMemory(handle, IpAddress, bytes, bytes.Length, out outTrash);
+        }
+
+        public bool Write<T>(long address, T value)
+        {
+            Type type = typeof(T);
+            if (type == typeof(sbyte)) return Write(address, new byte[1] { (byte)(sbyte)(object)value });
+            if (type == typeof(byte)) return Write(address, new byte[1] { (byte)(object)value });
+            if (type == typeof(short)) return Write(address, new byte[2] { (byte)((short)(object)value & 0xFF), (byte)((short)(object)value >> 8 & 0xFF) });
+            if (type == typeof(ushort)) return Write(address, new byte[2] { (byte)((ushort)(object)value & 0xFF), (byte)((ushort)(object)value >> 8 & 0xFF) });
+            if (type == typeof(int)) return Write(address, new byte[4] { (byte)((int)(object)value & 0xFF), (byte)((int)(object)value >> 8 & 0xFF), (byte)((int)(object)value >> 16 & 0xFF), (byte)((int)(object)value >> 24 & 0xFF) });
+            if (type == typeof(uint)) return Write(address, new byte[4] { (byte)((int)(object)value & 0xFF), (byte)((int)(object)value >> 8 & 0xFF), (byte)((int)(object)value >> 16 & 0xFF), (byte)((int)(object)value >> 24 & 0xFF) });
+            if (type == typeof(long)) return Write(address, new byte[8] { (byte)((long)(object)value & 0xFF), (byte)((long)(object)value >> 8 & 0xFF), (byte)((long)(object)value >> 16 & 0xFF), (byte)((long)(object)value >> 24 & 0xFF), (byte)((long)(object)value >> 32 & 0xFF), (byte)((long)(object)value >> 40 & 0xFF), (byte)((long)(object)value >> 48 & 0xFF), (byte)((long)(object)value >> 56 & 0xFF) });
+            if (type == typeof(ulong)) return Write(address, new byte[8] { (byte)((ulong)(object)value & 0xFF), (byte)((ulong)(object)value >> 8 & 0xFF), (byte)((ulong)(object)value >> 16 & 0xFF), (byte)((ulong)(object)value >> 24 & 0xFF), (byte)((ulong)(object)value >> 32 & 0xFF), (byte)((ulong)(object)value >> 40 & 0xFF), (byte)((ulong)(object)value >> 48 & 0xFF), (byte)((ulong)(object)value >> 56 & 0xFF) });
+
+            if (type == typeof(float)) return Write(address, BitConverter.GetBytes((float)(object)value));
+            if (type == typeof(double)) return Write(address, BitConverter.GetBytes((double)(object)value));
+            
+            return false;
         }
 
         public bool AllocateMemory(IntPtr address, int size, MemoryProtection protection)
