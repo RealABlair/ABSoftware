@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace ABSoftware.Structures
 {
@@ -32,26 +32,24 @@ namespace ABSoftware.Structures
             float l = Length();
             return new Vector2(x / l, y / l);
         }
-        
-        public static Vector2 Intersection(Vector2 a0, Vector2 a1, Vector2 b0, Vector2 b1)
+
+        public static bool Intersection(Vector2 a0, Vector2 a1, Vector2 b0, Vector2 b1, out Vector2 intersectionPoint)
         {
-            float n;
-            if (a1.y - a0.y != 0)
+            Vector2 r = (a1 - a0);
+            Vector2 s = (b1 - b0);
+
+            float d = r.x * s.y - r.y * s.x;
+            float u = ((b0.x - a0.x) * r.y - (b0.y - a0.y) * r.x) / d;
+            float t = ((b0.x - a0.x) * s.y - (b0.y - a0.y) * s.x) / d;
+
+            if (u >= 0f && u <= 1f && t >= 0f && t <= 1f)
             {
-                float q = (a1.x - a0.x) / (a0.y - a1.y);
-                float sn = (b0.x - b1.x) + (b0.y - b1.y) * q;
-                if (sn == 0f)
-                    return Zero;
-                float fn = (b0.x - a0.x) + (b0.y - a0.x) * q;
-                n = fn / sn;
+                intersectionPoint = a0 + (r * t);
+                return true;
             }
-            else
-            {
-                if (b0.y - b1.y == 0f)
-                    return Zero;
-                n = (b0.y - a0.y) / (b0.y - b1.y);
-            }
-            return new Vector2((b0.x + (b1.x - b0.x) * n), ((b0.y + (b1.y - b0.y) * n)));
+
+            intersectionPoint = Vector2.Zero;
+            return false;
         }
 
         public float[] GetRotations(Vector2 to)
@@ -66,11 +64,6 @@ namespace ABSoftware.Structures
         {
             x = (int)x;
             y = (int)y;
-        }
-
-        public Vector2 Copy()
-        {
-            return new Vector2(x, y);
         }
 
         #region Operators
