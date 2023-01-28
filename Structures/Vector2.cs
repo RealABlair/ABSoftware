@@ -43,6 +43,16 @@ namespace ABSoftware.Structures
             return (new Vector2(normal.x, normal.y) * (-2f * Dot(normal, direction))) + direction;
         }
 
+        public static Vector2 GetNormal(Vector2 a, Vector2 b, bool flipNormals = false)
+        {
+            Vector2 d = (b - a).Normalize();
+
+            if (!flipNormals)
+                return new Vector2(-d.y, d.x);
+            else
+                return new Vector2(d.y, -d.x);
+        }
+
         public static bool Intersection(Vector2 start1, Vector2 end1, Vector2 start2, Vector2 end2, out Vector2 intersectionPoint)
         {
             Vector2 r = (end1 - start1);
