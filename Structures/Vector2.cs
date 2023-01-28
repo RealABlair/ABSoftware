@@ -169,6 +169,51 @@ namespace ABSoftware.Structures
         {
             return (a.x <= b && a.y <= b);
         }
+
+        public static Vector2 operator +(float a, Vector2 b)
+        {
+            return new Vector2(a + b.x, a + b.y);
+        }
+
+        public static Vector2 operator -(float a, Vector2 b)
+        {
+            return new Vector2(a - b.x, a - b.y);
+        }
+
+        public static Vector2 operator *(float a, Vector2 b)
+        {
+            return new Vector2(a * b.x, a * b.y);
+        }
+
+        public static Vector2 operator /(float a, Vector2 b)
+        {
+            return new Vector2(a / b.x, a / b.y);
+        }
+
+        public static Vector2 operator %(float a, Vector2 b)
+        {
+            return new Vector2(a % b.x, a % b.y);
+        }
+
+        public static bool operator >(float a, Vector2 b)
+        {
+            return (a > b.x && a > b.y);
+        }
+
+        public static bool operator <(float a, Vector2 b)
+        {
+            return (a < b.x && a < b.y);
+        }
+
+        public static bool operator >=(float a, Vector2 b)
+        {
+            return (a >= b.x && a >= b.y);
+        }
+
+        public static bool operator <=(float a, Vector2 b)
+        {
+            return (a <= b.x && a <= b.y);
+        }
         #endregion
         #endregion
 
