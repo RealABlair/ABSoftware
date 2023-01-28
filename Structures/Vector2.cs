@@ -33,18 +33,28 @@ namespace ABSoftware.Structures
             return new Vector2(x / l, y / l);
         }
 
-        public static bool Intersection(Vector2 a0, Vector2 a1, Vector2 b0, Vector2 b1, out Vector2 intersectionPoint)
+        public static float Dot(Vector2 a, Vector2 b)
         {
-            Vector2 r = (a1 - a0);
-            Vector2 s = (b1 - b0);
+            return a.x * b.x + a.y * b.y;
+        }
+
+        public static Vector2 Reflect(Vector2 direction, Vector2 normal)
+        {
+            return (new Vector2(normal.x, normal.y) * (-2f * Dot(normal, direction))) + direction;
+        }
+
+        public static bool Intersection(Vector2 start1, Vector2 end1, Vector2 start2, Vector2 end2, out Vector2 intersectionPoint)
+        {
+            Vector2 r = (end1 - start1);
+            Vector2 s = (end2 - start2);
 
             float d = r.x * s.y - r.y * s.x;
-            float u = ((b0.x - a0.x) * r.y - (b0.y - a0.y) * r.x) / d;
-            float t = ((b0.x - a0.x) * s.y - (b0.y - a0.y) * s.x) / d;
+            float u = ((start2.x - start1.x) * r.y - (start2.y - start1.y) * r.x) / d;
+            float t = ((start2.x - start1.x) * s.y - (start2.y - start1.y) * s.x) / d;
 
             if (u >= 0f && u <= 1f && t >= 0f && t <= 1f)
             {
-                intersectionPoint = a0 + (r * t);
+                intersectionPoint = start1 + (r * t);
                 return true;
             }
 
