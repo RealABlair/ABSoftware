@@ -20,7 +20,9 @@ namespace ABSoftware
 
         public T[] GetElements()
         {
-            return elements;
+            T[] newArray = new T[elements.Length];
+            Array.Copy(this.elements, 0, newArray, 0, this.elements.Length);
+            return newArray;
         }
 
         public T Get(int id)
@@ -60,7 +62,7 @@ namespace ABSoftware
 
         public void RemoveIf(Func<T, bool> predicate)
         {
-            for(int i = 0; i < Size; i++)
+            for (int i = 0; i < Size; i++)
             {
                 if (predicate.Invoke(elements[i]))
                     Remove(elements[i]);
@@ -69,7 +71,7 @@ namespace ABSoftware
 
         public void Clear()
         {
-            Array.Clear(this.elements, 0, Size);
+            elements = new T[0];
         }
 
         public bool Contains(T element)
