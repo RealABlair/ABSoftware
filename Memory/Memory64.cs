@@ -320,8 +320,8 @@ namespace ABSoftware
             if (type == typeof(ushort)) return (T)(object)(ushort)(data[1] << 8 | data[0]);
             if (type == typeof(int)) return (T)(object)(int)(data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0]);
             if (type == typeof(uint)) return (T)(object)(uint)(data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0]);
-            if (type == typeof(long)) return (T)(object)(long)(data[7] << 56 | data[6] << 48 | data[5] << 40 | data[4] << 32 | data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0]);
-            if (type == typeof(ulong)) return (T)(object)(ulong)(data[7] << 56 | data[6] << 48 | data[5] << 40 | data[4] << 32 | data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0]);
+            if (type == typeof(long)) return (T)(object)(long)((long)data[7] << 56 | (long)data[6] << 48 | (long)data[5] << 40 | (long)data[4] << 32 | (long)data[3] << 24 | (long)data[2] << 16 | (long)data[1] << 8 | (long)data[0]);
+            if (type == typeof(ulong)) return (T)(object)(ulong)((long)data[7] << 56 | (long)data[6] << 48 | (long)data[5] << 40 | (long)data[4] << 32 | (long)data[3] << 24 | (long)data[2] << 16 | (long)data[1] << 8 | (long)data[0]);
 
             if (type == typeof(float)) return (T)(object)BitConverter.ToSingle(data, 0);
             if (type == typeof(double)) return (T)(object)BitConverter.ToDouble(data, 0);
