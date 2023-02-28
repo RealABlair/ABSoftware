@@ -62,10 +62,11 @@ namespace ABSoftware
 
         public void RemoveIf(Func<T, bool> predicate)
         {
-            for (int i = 0; i < Size; i++)
+            T[] stamp = GetElements();
+            for (int i = 0; i < stamp.Length; i++)
             {
-                if (predicate.Invoke(elements[i]))
-                    Remove(elements[i]);
+                if (predicate.Invoke(stamp[i]))
+                    Remove(stamp[i]);
             }
         }
 
