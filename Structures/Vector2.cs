@@ -2,14 +2,14 @@ using System;
 
 namespace ABSoftware.Structures
 {
-    public class Vector2
+    public struct Vector2
     {
         public static Vector2 Zero { get { return new Vector2(); } }
         public static Vector2 One { get { return new Vector2(1f, 1f); } }
         public static Vector2 Right { get { return new Vector2(1f); } }
         public static Vector2 Up { get { return new Vector2(0f, 1f); } }
 
-        public float x = 0, y = 0;
+        public float x, y;
 
         public Vector2(float x = 0f, float y = 0f)
         {
@@ -70,6 +70,11 @@ namespace ABSoftware.Structures
 
             intersectionPoint = Vector2.Zero;
             return false;
+        }
+
+        public static Vector2 Lerp(Vector2 from, Vector2 to, float t)
+        {
+            return new Vector2(Maths.Lerp(from.x, to.x, t), Maths.Lerp(from.y, to.y, t));
         }
 
         public float[] GetRotations(Vector2 to)
