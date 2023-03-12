@@ -74,21 +74,28 @@ namespace ABSoftware.Structures
 
         public static Vector2 Lerp(Vector2 from, Vector2 to, float t)
         {
-            return new Vector2(Maths.Lerp(from.x, to.x, t), Maths.Lerp(from.y, to.y, t));
+            return from * (1f - t) + to * t;
         }
 
-        public float[] GetRotations(Vector2 to)
+        public Vector2 GetRotations(Vector2 to)
         {
             float sin = (to - this).x / Distance(to);
             float cos = (to - this).y / Distance(to);
 
-            return new float[] { sin, cos };
+            return new Vector2(sin, cos).Normalize();
         }
 
         public void Floor()
         {
             x = (int)x;
             y = (int)y;
+        }
+
+        public void Round()
+        {
+            x += 0.5f;
+            y += 0.5f;
+            Floor();
         }
 
         #region Operators
