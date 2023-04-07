@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Reflection;
 
 namespace ABSoftware
 {
@@ -9,19 +7,6 @@ namespace ABSoftware
     {
         [DllImport("user32.dll")]
         public static extern int GetAsyncKeyState(int vKeys);
-
-        [DllImport("USER32.dll")]
-        public static extern short GetKeyState(int nVirtKey);
-
-        [DllImport("user32.dll")]
-        static extern void keybd_event(int nVirtKey, uint bScan, uint dwFlags, int dwExtraInfo);
-        
-        [DllImport("user32.dll")]
-        public static extern uint MapVirtualKey(uint uCode, uint uMapType);
-
-        static List<int> KEYS_CONSTS { get { return ScanKeysConsts(); } }
-
-        static bool[] LastKeysStamp;
 
         public struct Keys
         {
@@ -202,132 +187,81 @@ namespace ABSoftware
             public const int VK_OEM_CLEAR = 0xFE;
         }
 
-        static List<int> ScanKeysConsts()
+        int[] keyConsts;
+
+        public int KeysSize { get { if (keyConsts != null) return keyConsts.Length; else return -1; } }
+
+        bool[] oldKeysStamp;
+
+        public Input[] keyboardInput { get; private set; }
+
+        public void Initialize()
         {
-            List<int> l = new List<int>();
-            Type KeysType = typeof(Keys);
-            FieldInfo[] fields = KeysType.GetFields();
-            for (int i = 0; i < fields.Length; i++)
+            ReadKeyConsts();
+            oldKeysStamp = new bool[KeysSize];
+            keyboardInput = new Input[KeysSize];
+        }
+
+        public void UpdateStates()
+        {
+            for (int i = 0; i < KeysSize; i++)
             {
-                FieldInfo fi = fields[i];
-                l.Add((int)fi.GetValue(fi.Name));
-            }
-            return l;
-        }
+                bool newKeyState = GetAsyncKeyState(keyConsts[i]) != 0;
 
-        public static uint KEYEVENTF_KEYDOWN = 0x0000;
-        public static uint KEYEVENTF_KEYUP = 0x0002;
-        public static uint KEYEVENTF_EXTENDEDKEY = 0x0001;
-
-        public static void ExtendedKey(int VK_KEY, uint byteScan = 0x45)
-        {
-            keybd_event(VK_KEY, byteScan, KEYEVENTF_EXTENDEDKEY, 0);
-        }
-
-        public static void PressKey(int VK_KEY, uint byteScan = 0x45)
-        {
-            keybd_event(VK_KEY, byteScan, KEYEVENTF_KEYDOWN, 0);
-        }
-
-        public static void ReleaseKey(int VK_KEY, uint byteScan = 0x45)
-        {
-            keybd_event(VK_KEY, byteScan, KEYEVENTF_KEYUP, 0);
-        }
-
-        public static void UpdateKeys()
-        {
-            int KeysConstsCount = KEYS_CONSTS.Count;
-
-            bool newLKS = false; //the 'LastKeysStamp' was just created
-
-            if (LastKeysStamp == null)
-            {
-                LastKeysStamp = new bool[KeysConstsCount];
-                newLKS = true;
-            }
-
-            bool[] NewKeysStamp = new bool[KeysConstsCount];
-
-            for (int i = 0; i < KeysConstsCount; i++)
-            {
-                int currentVK_KEY = GetVK(i);
-                bool newState = GetAsyncKeyState(currentVK_KEY) != 0;
-                bool prevState = false;
-                NewKeysStamp[i] = newState;
-                if (newLKS)
+                if (newKeyState && !oldKeysStamp[i])
                 {
-                    if (!prevState && newState)
-                    {
-                        if (OnKeyDown != null)
-                            OnKeyDown.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
-                    }
+                    keyboardInput[i].isDown = true;
+                    keyboardInput[i].isUp = false;
+                    keyboardInput[i].isHeld = false;
+                }
+                else if (!newKeyState && oldKeysStamp[i])
+                {
+                    keyboardInput[i].isDown = false;
+                    keyboardInput[i].isUp = true;
+                    keyboardInput[i].isHeld = false;
+                }
+                else if (newKeyState && oldKeysStamp[i])
+                {
+                    keyboardInput[i].isDown = false;
+                    keyboardInput[i].isUp = false;
+                    keyboardInput[i].isHeld = true;
                 }
                 else
                 {
-                    prevState = LastKeysStamp[i];
-                    if (!prevState && newState)
-                    {
-                        if (OnKeyDown != null)
-                            OnKeyDown.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
-                    }
-                    else if (prevState && !newState)
-                    {
-                        if (OnKeyUp != null)
-                            OnKeyUp.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
-                    }
-                    else if (prevState && newState)
-                    {
-                        if (OnKeyHeld != null)
-                            OnKeyHeld.Invoke(GetVKName(currentVK_KEY), currentVK_KEY);
-                    }
+                    keyboardInput[i].isDown = false;
+                    keyboardInput[i].isUp = false;
+                    keyboardInput[i].isHeld = false;
                 }
+                this.oldKeysStamp[i] = newKeyState;
             }
-            NewKeysStamp.CopyTo(LastKeysStamp, 0);
         }
 
-        public static string GetVKName(int VK_KEY)
+        public Input GetInput(int Key)
         {
-            Type KeysType = typeof(Keys);
-            FieldInfo[] fields = KeysType.GetFields();
-            for (int i = 0; i < fields.Length; i++)
+            for (int i = 0; i < KeysSize; i++)
+                if (keyConsts[i] == Key) return keyboardInput[i];
+            return default;
+        }
+
+        public Input this[int Key]
+        {
+            get => GetInput(Key);
+        }
+
+        private void ReadKeyConsts()
+        {
+            Type type = typeof(Keys);
+            System.Reflection.FieldInfo[] info = type.GetFields();
+            keyConsts = new int[info.Length];
+            for (int i = 0; i < info.Length; i++)
             {
-                string Name = fields[i].Name;
-                int value = (int)fields[i].GetValue(Name);
-                if (value.Equals(VK_KEY))
-                    return Name;
-                continue;
+                keyConsts[i] = (int)info[i].GetValue(info[i].Name);
             }
-            return null;
         }
+    }
 
-        public static int GetVK(string VK_Name)
-        {
-            Type KeysType = typeof(Keys);
-            FieldInfo[] fields = KeysType.GetFields();
-            for (int i = 0; i < fields.Length; i++)
-            {
-                string Name = fields[i].Name;
-                int value = (int)fields[i].GetValue(Name);
-                if (Name.Equals(VK_Name))
-                    return value;
-                continue;
-            }
-            return -1;
-        }
-
-        public static int GetVK(int VK_ID)
-        {
-            Type KeysType = typeof(Keys);
-            FieldInfo[] fields = KeysType.GetFields();
-            string Name = fields[VK_ID].Name;
-            int value = (int)fields[VK_ID].GetValue(Name);
-            return value;
-        }
-
-        public delegate void KeyEvent(string VK_Name, int VK_KEY);
-
-        public static event KeyEvent OnKeyDown;
-        public static event KeyEvent OnKeyUp;
-        public static event KeyEvent OnKeyHeld;
+    public struct Input
+    {
+        public bool isDown, isHeld, isUp;
     }
 }
