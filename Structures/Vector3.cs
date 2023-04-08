@@ -1,9 +1,15 @@
-﻿using System;
+using System;
 
 namespace ABSoftware.Structures
 {
-    public class Vector3
+    public struct Vector3
     {
+        public static Vector3 Zero { get { return new Vector3(); } }
+        public static Vector3 One { get { return new Vector3(1f, 1f, 1f); } }
+        public static Vector3 Right { get { return new Vector3(1f); } }
+        public static Vector3 Up { get { return new Vector3(0f, 1f); } }
+        public static Vector3 Forward { get { return new Vector3(0f, 0f, 1f); } }
+
         public float x;
         public float y;
         public float z;
@@ -86,25 +92,146 @@ namespace ABSoftware.Structures
             z = a.z * b;
         }
 
-        public static Vector3 operator + (Vector3 a, Vector3 b)
+        #region Operators
+        #region Vectors
+        public static Vector3 operator +(Vector3 a, Vector3 b)
         {
             return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
         }
 
-        public static Vector3 operator - (Vector3 a, Vector3 b)
+        public static Vector3 operator -(Vector3 a, Vector3 b)
         {
             return new Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
         }
 
-        public static Vector3 operator / (Vector3 a, float b)
+        public static Vector3 operator *(Vector3 a, Vector3 b)
+        {
+            return new Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
+        }
+
+        public static Vector3 operator /(Vector3 a, Vector3 b)
+        {
+            return new Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
+        }
+
+        public static Vector3 operator %(Vector3 a, Vector3 b)
+        {
+            return new Vector3(a.x % b.x, a.y % b.y, a.z % b.z);
+        }
+
+        public static bool operator >(Vector3 a, Vector3 b)
+        {
+            return (a.x > b.x && a.y > b.y && a.z <= b.z);
+        }
+
+        public static bool operator <(Vector3 a, Vector3 b)
+        {
+            return (a.x < b.x && a.y < b.y && a.z < b.z);
+        }
+
+        public static bool operator >=(Vector3 a, Vector3 b)
+        {
+            return (a.x >= b.x && a.y >= b.y && a.z >= b.z);
+        }
+
+        public static bool operator <=(Vector3 a, Vector3 b)
+        {
+            return (a.x <= b.x && a.y <= b.y && a.z <= b.z);
+        }
+        #endregion
+
+        #region Floats
+        public static Vector3 operator +(Vector3 a, float b)
+        {
+            return new Vector3(a.x + b, a.y + b, a.z + b);
+        }
+
+        public static Vector3 operator -(Vector3 a, float b)
+        {
+            return new Vector3(a.x - b, a.y - b, a.z - b);
+        }
+
+        public static Vector3 operator *(Vector3 a, float b)
+        {
+            return new Vector3(a.x * b, a.y * b, a.z * b);
+        }
+
+        public static Vector3 operator /(Vector3 a, float b)
         {
             return new Vector3(a.x / b, a.y / b, a.z / b);
         }
 
-        public static Vector3 operator * (Vector3 a, float b)
+        public static Vector3 operator %(Vector3 a, float b)
         {
-            return new Vector3(a.x * b, a.y * b, a.z * b);
+            return new Vector3(a.x % b, a.y % b, a.z % b);
         }
+
+        public static bool operator >(Vector3 a, float b)
+        {
+            return (a.x > b && a.y > b && a.z > b);
+        }
+
+        public static bool operator <(Vector3 a, float b)
+        {
+            return (a.x < b && a.y < b && a.z < b);
+        }
+
+        public static bool operator >=(Vector3 a, float b)
+        {
+            return (a.x >= b && a.y >= b && a.z >= b);
+        }
+
+        public static bool operator <=(Vector3 a, float b)
+        {
+            return (a.x <= b && a.y <= b && a.z <= b);
+        }
+
+        public static Vector3 operator +(float a, Vector3 b)
+        {
+            return new Vector3(a + b.x, a + b.y, a + b.z);
+        }
+
+        public static Vector3 operator -(float a, Vector3 b)
+        {
+            return new Vector3(a - b.x, a - b.y, a - b.z);
+        }
+
+        public static Vector3 operator *(float a, Vector3 b)
+        {
+            return new Vector3(a * b.x, a * b.y, a * b.z);
+        }
+
+        public static Vector3 operator /(float a, Vector3 b)
+        {
+            return new Vector3(a / b.x, a / b.y, a / b.z);
+        }
+
+        public static Vector3 operator %(float a, Vector3 b)
+        {
+            return new Vector3(a % b.x, a % b.y, a % b.z);
+        }
+
+        public static bool operator >(float a, Vector3 b)
+        {
+            return (a > b.x && a > b.y && a > b.z);
+        }
+
+        public static bool operator <(float a, Vector3 b)
+        {
+            return (a < b.x && a < b.y && a < b.z);
+        }
+
+        public static bool operator >=(float a, Vector3 b)
+        {
+            return (a >= b.x && a >= b.y && a >= b.z);
+        }
+
+        public static bool operator <=(float a, Vector3 b)
+        {
+            return (a <= b.x && a <= b.y && a <= b.z);
+        }
+        #endregion
+        #endregion
 
         public override string ToString()
         {
