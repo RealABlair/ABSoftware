@@ -4,7 +4,7 @@ namespace ABSoftware
 {
     public class Hash
     {
-        public static int BLOCK_SIZE = 16;
+        public static int BLOCK_SIZE = 64;
         public static int BlockRange { get { return BLOCK_SIZE / 4; } }
         
         public static string GetHash(string input)
@@ -28,7 +28,7 @@ namespace ABSoftware
                     uint F = 0;
                     if(c >= 0 && c <= BlockRange)
                     {
-                        F = (uint)(buffer[c] & RotateLeft(buffer[c + 1], 4)) ^ 1;
+                        F = (uint)(buffer[c] & RotateLeft(buffer[c + 1], 6)) ^ 1;
                     }
                     else if(c > BlockRange && c <= BlockRange * 2)
                     {
