@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace ABSoftware
 {
@@ -16,6 +16,14 @@ namespace ABSoftware
         public T AddElement<T>()
         {
             return (T)AddElement(typeof(T));
+        }
+
+        public T AddElement<T>(T instance)
+        {
+            Array.Resize(ref pool, pool.Length + 1);
+            pool[pool.Length - 1] = instance;
+
+            return instance;
         }
 
         public object AddElement(Type type)
@@ -55,7 +63,7 @@ namespace ABSoftware
         public object[] GetElements(Type type)
         {
             object[] elements = new object[0];
-            for(int i = 0; i < pool.Length; i++)
+            for (int i = 0; i < pool.Length; i++)
                 if (pool[i].GetType().Equals(type))
                 {
                     Array.Resize(ref elements, elements.Length + 1);
