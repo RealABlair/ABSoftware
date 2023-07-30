@@ -1,4 +1,4 @@
-﻿using ABSoftware.Networking.Packets;
+using ABSoftware.Networking.Packets;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -110,6 +110,22 @@ namespace ABSoftware.Networking.ServerSide
             buffer.Write(packet.GetPacketId());
             packet.WritePacket(buffer);
             buffer.Append(PacketManager.PacketEnding);
+
+            client.SendPacket(buffer.ToArray());
+        }
+
+        public void SendPackets(Client client, params IPacket[] packets)
+        {
+            ByteBuilder buffer = new ByteBuilder();
+            for(int i = 0; i < packets.Length; i++)
+            {
+                PacketBuffer packetBuffer = new PacketBuffer();
+                packetBuffer.Write(packets[i].GetPacketId());
+                packets[i].WritePacket(packetBuffer);
+                packetBuffer.Append(PacketManager.PacketEnding);
+
+                buffer.Append(packetBuffer.ToArray());
+            }
 
             client.SendPacket(buffer.ToArray());
         }
@@ -232,14 +248,24 @@ namespace ABSoftware.Networking.ServerSide
             }
         }
 
-        public void SendPacket(byte[] data) => client.GetStream().Write(data, 0, data.Length);
+        public void SendPacket(byte[] data)
+        {
+            try
+            {
+                client.GetStream().Write(data, 0, data.Length);
+            }
+            catch(Exception) { }
+        }
 
         public void Disconnect()
         {
             this.Active = false;
             this.networkThread = null;
-            this.client.Close();
-            this.client = null;
+            if(this.client != null)
+            {
+                this.client.Close();
+                this.client = null;
+            }
         }
     }
 }
