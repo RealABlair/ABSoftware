@@ -93,6 +93,19 @@ namespace ABSoftware
             return null;
         }
 
+        public void RemoveProperty(string PropertyName)
+        {
+            for (int i = 0; i < tokens.Length; i++)
+                if (tokens[i].PropertyName == PropertyName)
+                    RemoveProperty(i);
+        }
+
+        public void RemoveProperty(int PropertyId)
+        {
+            Array.Copy(this.tokens, PropertyId + 1, this.tokens, PropertyId, this.Size - PropertyId - 1);
+            Array.Resize(ref this.tokens, this.Size - 1);
+        }
+
         public bool PropertyExists(string PropertyName)
         {
             for (int i = 0; i < Size; i++) if (this.tokens[i].PropertyName.Equals(PropertyName)) return true;
