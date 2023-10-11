@@ -74,5 +74,22 @@ namespace ABSoftware
             for(int i = 0; i < Children.Length; i++) if (Children[i].PropertyName.Equals(PropertyName)) return true;
             return false;
         }
+
+        public void RemoveChild(string PropertyName)
+        {
+            if (Children == null || Children.Length <= 0)
+                return;
+            for (int i = 0; i < Children.Length; i++)
+                if (Children[i].PropertyName == PropertyName)
+                    RemoveChild(i);
+        }
+
+        public void RemoveChild(int PropertyId)
+        {
+            if (Children == null || Children.Length <= 0)
+                return;
+            Array.Copy(this.Children, PropertyId + 1, this.Children, PropertyId, this.Children.Length - PropertyId - 1);
+            Array.Resize(ref this.Children, this.Children.Length - 1);
+        }
     }
 }
