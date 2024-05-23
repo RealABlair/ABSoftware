@@ -8,8 +8,8 @@ namespace ABSoftware.UI
 {
     public class RoundedButton : Button
     {
-        private float _borderSize = 0f;
-        private float _radius = 0f;
+        private float _borderSize = 2f;
+        private float _radius = 20f;
         private Color _borderColor = Color.Black;
 
         [Category("ABSoftware UI")]
@@ -39,34 +39,65 @@ namespace ABSoftware.UI
 
         protected override void OnPaint(PaintEventArgs pevent)
         {
-            base.OnPaint(pevent);
-            
+            pevent.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            pevent.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
+            pevent.Graphics.Clear(Parent.BackColor);
+
             RectangleF Rect = new RectangleF(0, 0, this.Width, this.Height);
             RectangleF RectBorder = RectangleF.Inflate(Rect, -BorderSize/2f, -BorderSize/2f);
             if (this.Radius > 1)
             {
                 using (GraphicsPath pathBorder = GetRoundedCorners(RectBorder, this.Radius - this.BorderSize))
                 using (GraphicsPath path = GetRoundedCorners(Rect, this.Radius))
-                using (Pen pen = new Pen(BackColor, 2f))
+                using (SolidBrush brush = new SolidBrush(BackColor))
                 using (Pen penBorder = new Pen(BorderColor, BorderSize))
                 {
-                    pevent.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    this.Region = new Region(path);
-
-                    pevent.Graphics.DrawPath(pen, path);
+                    pevent.Graphics.FillPath(brush, path);
 
                     if (BorderSize > 0)
                         pevent.Graphics.DrawPath(penBorder, pathBorder);
+
+                    PointF textLocation = GetTextLocation(pevent.Graphics.MeasureString(this.Text, this.Font));
+                    pevent.Graphics.DrawString(this.Text, this.Font, new SolidBrush(ForeColor), textLocation.X, textLocation.Y);
                 }
             }
             else
             {
-                this.Region = new Region(Rect);
-                using (Pen p = new Pen(BackColor, 1f))
+                using (SolidBrush brush = new SolidBrush(BackColor))
+                using (Pen penBorder = new Pen(BorderColor, BorderSize))
                 {
-                    p.Alignment = PenAlignment.Inset;
-                    pevent.Graphics.DrawRectangle(p, 0, 0, this.Width-1, this.Height-1);
+                    pevent.Graphics.FillRectangle(brush, 0, 0, this.Width - 1, this.Height - 1);
+                    pevent.Graphics.DrawRectangle(penBorder, 1f, 1f, this.Width - 2, this.Height - 2);
+                    PointF textLocation = GetTextLocation(pevent.Graphics.MeasureString(this.Text, this.Font));
+                    pevent.Graphics.DrawString(this.Text, this.Font, new SolidBrush(ForeColor), textLocation.X, textLocation.Y);
                 }
+            }
+        }
+
+        private PointF GetTextLocation(SizeF textSize)
+        {
+            switch(TextAlign)
+            {
+                case ContentAlignment.TopLeft:
+                    return new PointF(0f + BorderSize, 0f + BorderSize);
+                case ContentAlignment.TopCenter:
+                    return new PointF(this.Width / 2f - textSize.Width / 2f, 0f + BorderSize);
+                case ContentAlignment.TopRight:
+                    return new PointF(this.Width - textSize.Width - BorderSize, 0f);
+                case ContentAlignment.MiddleLeft:
+                    return new PointF(0f + BorderSize, this.Height / 2f - textSize.Height / 2f);
+                case ContentAlignment.MiddleCenter:
+                    return new PointF(this.Width / 2f - textSize.Width / 2f, this.Height / 2f - textSize.Height / 2f);
+                case ContentAlignment.MiddleRight:
+                    return new PointF(this.Width - textSize.Width - BorderSize, this.Height / 2f - textSize.Height / 2f);
+                case ContentAlignment.BottomLeft:
+                    return new PointF(0f + this.BorderSize, this.Height - textSize.Height - BorderSize);
+                case ContentAlignment.BottomCenter:
+                    return new PointF(this.Width / 2f - textSize.Width / 2f, this.Height - textSize.Height - BorderSize);
+                case ContentAlignment.BottomRight:
+                    return new PointF(this.Width - textSize.Width - BorderSize, this.Height - textSize.Height - BorderSize);
+                default:
+                    return new PointF(0f, 0f);
             }
         }
 
