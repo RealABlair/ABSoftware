@@ -59,7 +59,7 @@ namespace ABSoftware.UI
                     if (BorderSize > 0)
                         pevent.Graphics.DrawPath(penBorder, pathBorder);
 
-                    PointF textLocation = GetTextLocation(pevent.Graphics.MeasureString(this.Text, this.Font));
+                    PointF textLocation = GetTextLocation(pevent.Graphics.MeasureString(this.Text, this.Font), radius);
                     pevent.Graphics.DrawString(this.Text, this.Font, new SolidBrush(ForeColor), textLocation.X, textLocation.Y);
                 }
             }
@@ -70,22 +70,22 @@ namespace ABSoftware.UI
                 {
                     pevent.Graphics.FillRectangle(brush, 0, 0, this.Width - 1, this.Height - 1);
                     pevent.Graphics.DrawRectangle(penBorder, 1f, 1f, this.Width - 2, this.Height - 2);
-                    PointF textLocation = GetTextLocation(pevent.Graphics.MeasureString(this.Text, this.Font));
+                    PointF textLocation = GetTextLocation(pevent.Graphics.MeasureString(this.Text, this.Font), radius);
                     pevent.Graphics.DrawString(this.Text, this.Font, new SolidBrush(ForeColor), textLocation.X, textLocation.Y);
                 }
             }
         }
 
-        private PointF GetTextLocation(SizeF textSize)
+        private PointF GetTextLocation(SizeF textSize, float radius)
         {
             switch(TextAlign)
             {
                 case ContentAlignment.TopLeft:
-                    return new PointF(0f + BorderSize, 0f + BorderSize);
+                    return new PointF(0f + BorderSize + radius / 3, 0f + BorderSize);
                 case ContentAlignment.TopCenter:
                     return new PointF(this.Width / 2f - textSize.Width / 2f, 0f + BorderSize);
                 case ContentAlignment.TopRight:
-                    return new PointF(this.Width - textSize.Width - BorderSize, 0f);
+                    return new PointF(this.Width - textSize.Width - BorderSize - radius / 3, 0f);
                 case ContentAlignment.MiddleLeft:
                     return new PointF(0f + BorderSize, this.Height / 2f - textSize.Height / 2f);
                 case ContentAlignment.MiddleCenter:
@@ -93,11 +93,11 @@ namespace ABSoftware.UI
                 case ContentAlignment.MiddleRight:
                     return new PointF(this.Width - textSize.Width - BorderSize, this.Height / 2f - textSize.Height / 2f);
                 case ContentAlignment.BottomLeft:
-                    return new PointF(0f + this.BorderSize, this.Height - textSize.Height - BorderSize);
+                    return new PointF(0f + this.BorderSize + radius / 3, this.Height - textSize.Height - BorderSize);
                 case ContentAlignment.BottomCenter:
                     return new PointF(this.Width / 2f - textSize.Width / 2f, this.Height - textSize.Height - BorderSize);
                 case ContentAlignment.BottomRight:
-                    return new PointF(this.Width - textSize.Width - BorderSize, this.Height - textSize.Height - BorderSize);
+                    return new PointF(this.Width - textSize.Width - BorderSize - radius / 3, this.Height - textSize.Height - BorderSize);
                 default:
                     return new PointF(0f, 0f);
             }
