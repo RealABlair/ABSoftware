@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -9,11 +9,11 @@ namespace ABSoftware.UI
     public class RoundedButton : Button
     {
         private float _borderSize = 2f;
-        private float _radius = 20f;
+        private float _radius = 0.5f;
         private Color _borderColor = Color.Black;
 
-        [Category("ABSoftware UI")]
-        public float Radius { get { return _radius; } set { _radius = value; Invalidate(); } }
+        [Category("ABSoftware UI"), Description("Radius multiplier. Range from 0 to 1. 1 = max radius.")]
+        public float RadiusStrength { get { return _radius; } set { _radius = value; Invalidate(); } }
         [Category("ABSoftware UI")]
         public float BorderSize { get { return _borderSize; } set { _borderSize = value; Invalidate(); } }
         [Category("ABSoftware UI")]
@@ -43,12 +43,14 @@ namespace ABSoftware.UI
             pevent.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
             pevent.Graphics.Clear(Parent.BackColor);
 
+            float radius = this.RadiusStrength * this.Height;
+
             RectangleF Rect = new RectangleF(0, 0, this.Width, this.Height);
             RectangleF RectBorder = RectangleF.Inflate(Rect, -BorderSize/2f, -BorderSize/2f);
-            if (this.Radius > 1)
+            if (radius > 1)
             {
-                using (GraphicsPath pathBorder = GetRoundedCorners(RectBorder, this.Radius - this.BorderSize))
-                using (GraphicsPath path = GetRoundedCorners(Rect, this.Radius))
+                using (GraphicsPath pathBorder = GetRoundedCorners(RectBorder, radius - this.BorderSize))
+                using (GraphicsPath path = GetRoundedCorners(Rect, radius))
                 using (SolidBrush brush = new SolidBrush(BackColor))
                 using (Pen penBorder = new Pen(BorderColor, BorderSize))
                 {
@@ -100,11 +102,5 @@ namespace ABSoftware.UI
                     return new PointF(0f, 0f);
             }
         }
-
-        /*protected override void OnBackColorChanged(EventArgs e)
-        {
-            base.OnBackColorChanged(e);
-            Invalidate();
-        }*/
     }
 }
