@@ -82,7 +82,7 @@ namespace ABSoftware.UI
             if(toggleAnimations)
             {
                 forceEndAnimation = true;
-                new Thread(() =>
+                Thread t = new Thread(() =>
                 {
                     forceEndAnimation = false;
                     bool done = false;
@@ -115,7 +115,9 @@ namespace ABSoftware.UI
                     targetBackgroundColor = default(ColorF);
                     targetForegroundColor = default(ColorF);
                     target = 0;
-                }).Start();
+                });
+                t.IsBackground = true;
+                t.Start();
             }
         }
 
