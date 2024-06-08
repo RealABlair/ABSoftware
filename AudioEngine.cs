@@ -42,7 +42,9 @@ namespace ABSoftware
             public ushort cbSize;
         }
 
-    public delegate void WaveOutProc(IntPtr hWaveOut, uint uMsg, uint dwInstance, uint dwParam1, uint dwParam2);
+        public const float PI = 3.141592653589f; 
+
+        public delegate void WaveOutProc(IntPtr hWaveOut, uint uMsg, uint dwInstance, uint dwParam1, uint dwParam2);
 
         static WaveOutProc waveOutProc;
 
@@ -93,9 +95,9 @@ namespace ABSoftware
 
             unsafe
             {
-                fixed(short* memory = blockMemory)
+                fixed (short* memory = blockMemory)
                 {
-                    for(uint n = 0; n < blockCount; n++)
+                    for (uint n = 0; n < blockCount; n++)
                     {
                         waveHeaders[n].dwBufferLength = (uint)(blockSamples * 2);
                         waveHeaders[n].lpData = (IntPtr)(memory + (n * blockSamples));
@@ -107,6 +109,32 @@ namespace ABSoftware
             audioThread = new Thread(AudioThread);
             audioThread.Start();
         }
+
+        public float AngularVelocity(float frequency)
+        {
+            return frequency * 2f * PI;
+        }
+
+        public float Oscilator(float frequency, float time, OscilatorType type)
+        {
+            switch(type)
+            {
+                case OscilatorType.Sin:
+                    return (float)Math.Sin(AngularVelocity(frequency) * time);
+                case OscilatorType.Square:
+                    return (Math.Sin(AngularVelocity(frequency) * time) > 0) ? 1f : -1f;
+
+                default:
+                    return 0f;
+            }
+        }
+
+        public enum OscilatorType
+        {
+            Sin,
+            Square
+        }
+
 
         public void Close()
         {
@@ -141,7 +169,7 @@ namespace ABSoftware
             float timeStep = 1f / sampleRate;
             float maxSample = (float)(Math.Pow(2, (2 * 8) - 1) - 1);
 
-            while(Active)
+            while (Active)
             {
                 if (blocksFree == 0)
                     while (blocksFree == 0)
@@ -155,11 +183,11 @@ namespace ABSoftware
                 if ((waveHeaders[blockCurrent].dwFlags & 2) != 0)
                     waveOutUnprepareHeader(audioDevice, ref waveHeaders[blockCurrent], waveHeaderSize);
 
-                for(uint n = 0; n < blockSamples; n += channels)
+                for (uint n = 0; n < blockSamples; n += channels)
                 {
-                    for(int c = 0; c < channels; c++)
+                    for (int c = 0; c < channels; c++)
                     {
-                        if(userFunction != null)
+                        if (userFunction != null)
                             newSample = (short)(clip(userFunction.Invoke(c, GlobalTime), 1f) * maxSample);
                         else
                             newSample = (short)(clip(DefaultUserFunction(c, GlobalTime), 1f) * maxSample);
@@ -175,6 +203,71 @@ namespace ABSoftware
                 blockCurrent++;
                 blockCurrent %= blockCount;
             }
+        }
+    }
+
+    public class ADSREnvelope
+    {
+        public float attackTime, decayTime, releaseTime;
+        public float sustainAmplitude, startAmplitude;
+        public float onTime, offTime;
+        public bool noteDown;
+
+        public ADSREnvelope(float attackTime = 0.1f, float decayTime = 0.01f, float releaseTime = 0.2f, float sustainAmplitude = 0.8f, float startAmplitude = 1f)
+        {
+            this.attackTime = attackTime;
+            this.decayTime = decayTime;
+            this.releaseTime = releaseTime;
+            this.sustainAmplitude = sustainAmplitude;
+            this.startAmplitude = startAmplitude;
+            this.onTime = 0f;
+            this.offTime = 0f;
+            this.noteDown = false;
+        }
+
+        public void PressNote(float time)
+        {
+            this.onTime = time;
+            this.noteDown = true;
+        }
+
+        public void ReleaseNote(float time)
+        {
+            this.offTime = time;
+            this.noteDown = false;
+        }
+
+        public float GetCurrentAmplitude(float time)
+        {
+            float amplitude = 0f;
+            float lifetime = time - onTime;
+            
+            if (noteDown)
+            {
+                if(lifetime <= attackTime)
+                {
+                    amplitude = (lifetime / attackTime) * startAmplitude;
+                }
+
+                if(lifetime > attackTime && lifetime <= (attackTime + decayTime))
+                {
+                    amplitude = ((lifetime - attackTime) / decayTime) * (sustainAmplitude - startAmplitude) + startAmplitude;
+                }
+
+                if(lifetime > (attackTime + decayTime))
+                {
+                    amplitude = sustainAmplitude;
+                }
+            }
+            else
+            {
+                amplitude = ((time - offTime) / releaseTime) * (0f - sustainAmplitude) + sustainAmplitude;
+            }
+
+            if (amplitude <= 0.0001f)
+                amplitude = 0f;
+
+            return amplitude;
         }
     }
 }
