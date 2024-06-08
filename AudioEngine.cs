@@ -112,7 +112,7 @@ namespace ABSoftware
 
         public float AngularVelocity(float frequency)
         {
-            return frequency * 2f * PI;
+            return frequency * 2.0f * PI;
         }
 
         public float Oscilator(float frequency, float time, OscilatorType type)
