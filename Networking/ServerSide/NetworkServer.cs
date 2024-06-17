@@ -39,7 +39,7 @@ namespace ABSoftware.Networking.ServerSide
             if(Active)
             {
                 Active = false;
-                this.listener = null;
+                this.listener.Stop();
                 this.networkThread = null;
             }
         }
@@ -70,7 +70,6 @@ namespace ABSoftware.Networking.ServerSide
                 }
             }
             catch(Exception) { }
-            this.listener.Stop();
             OnStop();
         }
 
