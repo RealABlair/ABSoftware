@@ -92,14 +92,17 @@ namespace ABSoftware.Networking.ServerSide
 
         public void Disconnect()
         {
-            for(int i = 0; i < clients.Size; i++)
+            while(clients.Size > 0)
             {
-                Client client = clients[i];
+                Client client = clients[0];
                 if (client == null)
-                    return;
-                OnClientDisconnect(client);
-                client.Disconnect();
-                clients.Remove(client);
+                    clients.Remove(client);
+                else
+                {
+                    OnClientDisconnect(client);
+                    client.Disconnect();
+                    clients.Remove(client);
+                }
             }
         }
 
