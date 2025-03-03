@@ -1,50 +1,82 @@
-using System;
+﻿using System;
 
 namespace ABSoftware
 {
-    public class ArrayList<T>
+    public class NewArrayList<T>
     {
         T[] elements = null;
 
-        public int Size { get { return elements.Length; } }
+        public int Capacity 
+        { 
+            get { return elements.Length; } 
+            set 
+            {
+                T[] newArray = new T[value];
+                Array.Copy(elements, 0, newArray, 0, Size);
+                elements = newArray;
+            } 
+        }
+        public int Size { get; private set; }
 
-        public ArrayList()
+        public NewArrayList()
         {
             this.elements = new T[0];
+            this.Size = 0;
         }
 
-        public ArrayList(T[] elements)
+        public NewArrayList(T[] elements)
         {
             this.elements = elements;
+            this.Size = elements.Length;
         }
 
         public T[] GetElements()
         {
-            T[] newArray = new T[elements.Length];
-            Array.Copy(this.elements, 0, newArray, 0, this.elements.Length);
+            T[] newArray = new T[Size];
+            Array.Copy(this.elements, 0, newArray, 0, Size);
             return newArray;
         }
 
         public T Get(int id)
         {
-            return elements[id];
+            if (id < Size)
+                return elements[id];
+            else
+                throw new ArgumentOutOfRangeException("Element id is out of bounds!");
         }
 
         public T this[int id]
         {
-            get { return elements[id]; }
+            get { if (id < Size) return elements[id]; else throw new ArgumentOutOfRangeException("Element id is out of bounds!"); }
             set { elements[id] = value; }
+        }
+
+        void ControlCapacity(int minCapacity)
+        {
+            if(this.elements.Length < minCapacity)
+            {
+                int newCapacity = (elements.Length == 0) ? 4 : (elements.Length * 2);
+
+                if (newCapacity > int.MaxValue - 8)
+                    newCapacity = int.MaxValue - 8;
+                if (newCapacity < minCapacity)
+                    newCapacity = minCapacity;
+
+                this.Capacity = newCapacity;
+            }
         }
 
         public void Add(T element)
         {
-            Array.Resize(ref elements, elements.Length + 1);
-            elements[elements.Length - 1] = element;
+            if (Size == elements.Length)
+                ControlCapacity(Size + 1);
+            elements[Size] = element;
+            Size++;
         }
 
         public void Remove(T element)
         {
-            for (int i = 0; i < elements.Length; i++)
+            for (int i = 0; i < Size; i++)
             {
                 if (elements[i].Equals(element))
                 {
@@ -57,7 +89,7 @@ namespace ABSoftware
         public void RemoveAt(int id)
         {
             Array.Copy(this.elements, id + 1, this.elements, id, this.Size - id - 1);
-            Array.Resize(ref this.elements, this.Size - 1);
+            Size--;
         }
 
         public void RemoveIf(Func<T, bool> predicate)
@@ -73,11 +105,13 @@ namespace ABSoftware
         public void Clear()
         {
             elements = new T[0];
+            Size = 0;
+            ControlCapacity(0);
         }
 
         public bool Contains(T element)
         {
-            for (int i = 0; i < elements.Length; i++)
+            for (int i = 0; i < Size; i++)
             {
                 if (elements[i].Equals(element))
                     return true;
@@ -105,9 +139,9 @@ namespace ABSoftware
             return -1;
         }
 
-        public ArrayList<T> Copy()
+        public NewArrayList<T> Copy()
         {
-            ArrayList<T> newList = new ArrayList<T>();
+            NewArrayList<T> newList = new NewArrayList<T>();
             Array.Copy(elements, 0, newList.elements, 0, Size);
             return newList;
         }
