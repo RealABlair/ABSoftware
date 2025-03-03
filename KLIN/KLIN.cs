@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text;
 
 namespace ABSoftware
@@ -9,16 +9,44 @@ namespace ABSoftware
 
         KLINToken[] tokens;
 
-        public int Size { get { return tokens.Length; } }
+        public int Capacity
+        {
+            get { return tokens.Length; }
+            set
+            {
+                KLINToken[] newArray = new KLINToken[value];
+                Array.Copy(tokens, 0, newArray, 0, Size);
+                tokens = newArray;
+            }
+        }
+
+        void ControlCapacity(int minCapacity)
+        {
+            if (this.tokens.Length < minCapacity)
+            {
+                int newCapacity = (tokens.Length == 0) ? 4 : (tokens.Length * 2);
+
+                if (newCapacity > int.MaxValue - 8)
+                    newCapacity = int.MaxValue - 8;
+                if (newCapacity < minCapacity)
+                    newCapacity = minCapacity;
+
+                this.Capacity = newCapacity;
+            }
+        }
+
+        public int Size { get; private set; }
 
         public KLIN()
         {
             this.tokens = new KLINToken[0];
+            Size = 0;
         }
 
         public KLIN(KLINToken[] tokens)
         {
             this.tokens = tokens;
+            Size = 0;
         }
 
         public KLINToken[] GetTokens()
@@ -57,14 +85,18 @@ namespace ABSoftware
 
         public void AddProperty(string PropertyName, object PropertyObject)
         {
-            Array.Resize(ref this.tokens, Size + 1);
-            this.tokens[Size - 1] = new KLINToken(PropertyName, PropertyObject);
+            if (Size == tokens.Length)
+                ControlCapacity(Size + 1);
+            this.tokens[Size] = new KLINToken(PropertyName, PropertyObject);
+            Size++;
         }
 
         public void AddProperty(KLINToken token)
         {
-            Array.Resize(ref this.tokens, Size + 1);
-            this.tokens[Size - 1] = token;
+            if (Size == tokens.Length)
+                ControlCapacity(Size + 1);
+            this.tokens[Size] = token;
+            Size++;
         }
 
         public object GetProperty(string PropertyName)
@@ -95,7 +127,7 @@ namespace ABSoftware
 
         public void RemoveProperty(string PropertyName)
         {
-            for (int i = 0; i < tokens.Length; i++)
+            for (int i = 0; i < Size; i++)
                 if (tokens[i].PropertyName == PropertyName)
                     RemoveProperty(i);
         }
@@ -103,7 +135,7 @@ namespace ABSoftware
         public void RemoveProperty(int PropertyId)
         {
             Array.Copy(this.tokens, PropertyId + 1, this.tokens, PropertyId, this.Size - PropertyId - 1);
-            Array.Resize(ref this.tokens, this.Size - 1);
+            Size--;
         }
 
         public bool PropertyExists(string PropertyName)

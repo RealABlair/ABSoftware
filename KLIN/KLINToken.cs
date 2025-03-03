@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace ABSoftware
 {
@@ -12,8 +12,36 @@ namespace ABSoftware
         public KLINToken Parent = null;
         public KLINToken[] Children = null;
 
+        public int ChildrenCapacity
+        {
+            get { return Children.Length; }
+            set
+            {
+                KLINToken[] newArray = new KLINToken[value];
+                Array.Copy(Children, 0, newArray, 0, ChildrenCount);
+                Children = newArray;
+            }
+        }
+
+        void ControlCapacity(int minCapacity)
+        {
+            if (this.Children.Length < minCapacity)
+            {
+                int newCapacity = (Children.Length == 0) ? 4 : (Children.Length * 2);
+
+                if (newCapacity > int.MaxValue - 8)
+                    newCapacity = int.MaxValue - 8;
+                if (newCapacity < minCapacity)
+                    newCapacity = minCapacity;
+
+                this.ChildrenCapacity = newCapacity;
+            }
+        }
+
+        public int ChildrenCount { get; private set; }
+
         public bool HasParent { get { return Parent != null; } }
-        public bool HasChildren { get { return Children != null && Children.Length > 0; } }
+        public bool HasChildren { get { return Children != null && ChildrenCount > 0; } }
         public bool IsComment { get { return PropertyName.Length >= 1 && PropertyName[0] == '#'; } }
 
         public KLINToken()
@@ -24,6 +52,7 @@ namespace ABSoftware
         public KLINToken(string PropertyName, object PropertyObject)
         {
             this.Children = new KLINToken[0];
+            this.ChildrenCount = 0;
 
             this.PropertyName = PropertyName;
             this.PropertyObject = PropertyObject;
@@ -32,37 +61,45 @@ namespace ABSoftware
         public KLINToken(string PropertyName, object PropertyObject, KLINToken Parent = null, KLINToken[] Children = null)
         {
             this.Children = new KLINToken[0];
+            this.ChildrenCount = 0;
 
             this.PropertyName = PropertyName;
             this.PropertyObject = PropertyObject;
             this.Parent = Parent;
 
-            if(Children != null)
-            this.Children = Children;
+            if (Children != null)
+            {
+                this.Children = Children;
+                this.ChildrenCount = Children.Length;
+            }
         }
 
         public KLINToken this[string PropertyName]
         {
             get { if (HasChild(PropertyName)) return GetChild(PropertyName); else { AddChild(PropertyName, null); return GetChild(PropertyName); } }
-            set { if (HasChild(PropertyName)) for (int i = 0; i < Children.Length; i++)  { if (Children[i].PropertyName.Equals(PropertyName)) Children[i] = value; } }
+            set { if (HasChild(PropertyName)) for (int i = 0; i < ChildrenCount; i++) { if (Children[i].PropertyName.Equals(PropertyName)) Children[i] = value; } }
         }
 
         public void AddChild(string PropertyName, object PropertyObject)
         {
-            Array.Resize(ref Children, Children.Length + 1);
-            Children[Children.Length - 1] = new KLINToken(PropertyName, PropertyObject, this);
+            if (ChildrenCount == Children.Length)
+                ControlCapacity(ChildrenCount + 1);
+            Children[ChildrenCount] = new KLINToken(PropertyName, PropertyObject, this);
+            ChildrenCount++;
         }
 
         public void AddChild(KLINToken token)
         {
-            Array.Resize(ref Children, Children.Length + 1);
-            Children[Children.Length - 1] = token;
+            if (ChildrenCount == Children.Length)
+                ControlCapacity(ChildrenCount + 1);
+            Children[ChildrenCount] = token;
+            ChildrenCount++;
             token.Parent = this;
         }
 
         public KLINToken GetChild(string PropertyName)
         {
-            for(int i = 0; i < Children.Length; i++)
+            for (int i = 0; i < ChildrenCount; i++)
             {
                 if (Children[i].PropertyName.Equals(PropertyName)) return Children[i];
             }
@@ -71,7 +108,7 @@ namespace ABSoftware
 
         public bool HasChild(string PropertyName)
         {
-            for(int i = 0; i < Children.Length; i++) if (Children[i].PropertyName.Equals(PropertyName)) return true;
+            for (int i = 0; i < ChildrenCount; i++) if (Children[i].PropertyName.Equals(PropertyName)) return true;
             return false;
         }
 
@@ -79,7 +116,7 @@ namespace ABSoftware
         {
             if (!HasChildren)
                 return;
-            for (int i = 0; i < Children.Length; i++)
+            for (int i = 0; i < ChildrenCount; i++)
                 if (Children[i].PropertyName == PropertyName)
                     RemoveChild(i);
         }
@@ -88,8 +125,8 @@ namespace ABSoftware
         {
             if (!HasChildren)
                 return;
-            Array.Copy(this.Children, PropertyId + 1, this.Children, PropertyId, this.Children.Length - PropertyId - 1);
-            Array.Resize(ref this.Children, this.Children.Length - 1);
+            Array.Copy(this.Children, PropertyId + 1, this.Children, PropertyId, ChildrenCount - PropertyId - 1);
+            ChildrenCount--;
         }
     }
 }

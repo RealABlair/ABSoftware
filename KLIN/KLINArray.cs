@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text;
 
 namespace ABSoftware
@@ -7,7 +7,33 @@ namespace ABSoftware
     {
         object[] array;
 
-        public int Size { get { return array.Length; } }
+        public int Capacity
+        {
+            get { return array.Length; }
+            set
+            {
+                object[] newArray = new object[value];
+                Array.Copy(array, 0, newArray, 0, Size);
+                array = newArray;
+            }
+        }
+
+        void ControlCapacity(int minCapacity)
+        {
+            if (this.array.Length < minCapacity)
+            {
+                int newCapacity = (array.Length == 0) ? 4 : (array.Length * 2);
+
+                if (newCapacity > int.MaxValue - 8)
+                    newCapacity = int.MaxValue - 8;
+                if (newCapacity < minCapacity)
+                    newCapacity = minCapacity;
+
+                this.Capacity = newCapacity;
+            }
+        }
+
+        public int Size { get; private set; }
 
         public KLINArray()
         {
@@ -27,21 +53,31 @@ namespace ABSoftware
 
         public void Add(object obj)
         {
-            Array.Resize(ref this.array, this.array.Length + 1);
-            this.array[this.array.Length - 1] = obj;
+            if (Size == array.Length)
+                ControlCapacity(Size + 1);
+            this.array[Size] = obj;
+            Size++;
         }
 
         public object Get(int id)
         {
-            if (id >= this.array.Length)
+            if (id >= Size)
                 return null;
 
             return this.array[id];
         }
 
+        public void RemoveAt(int id)
+        {
+            Array.Copy(this.array, id + 1, this.array, id, this.Size - id - 1);
+            Size--;
+        }
+
         public void Clear()
         {
             this.array = new object[0];
+            Size = 0;
+            ControlCapacity(0);
         }
 
         private readonly StringBuilder ParseBuilder = new StringBuilder();
@@ -54,12 +90,12 @@ namespace ABSoftware
             bool isInQuotes = false;
 
             ParseBuilder.Clear();
-            
-            for(int i = 1; i < KLIN.Length; i++)
+
+            for (int i = 1; i < KLIN.Length; i++)
             {
                 if (KLIN[i] == ']')
                 {
-                    if(ParseBuilder.Length > 0)
+                    if (ParseBuilder.Length > 0)
                     {
                         if (isInQuotes)
                             Add(ParseBuilder.ToString());
@@ -72,7 +108,7 @@ namespace ABSoftware
                 if (!isInQuotes && KLIN[i] == ' ')
                     continue;
 
-                if(KLIN[i] == '"')
+                if (KLIN[i] == '"')
                 {
                     if (isInQuotes && KLIN[i + 1] == ',')
                     {
@@ -89,16 +125,16 @@ namespace ABSoftware
                 if (!readingToken && KLIN[i] != ',' && KLIN[i] != ' ')
                     readingToken = true;
 
-                if(!isInQuotes && KLIN[i] == ',')
+                if (!isInQuotes && KLIN[i] == ',')
                 {
                     readingToken = false;
                 }
 
-                if(readingToken)
+                if (readingToken)
                 {
                     ParseBuilder.Append(KLIN[i]);
                 }
-                else if(ParseBuilder.Length > 0)
+                else if (ParseBuilder.Length > 0)
                 {
                     Add(GetTokenType(ParseBuilder.ToString()));
                     ParseBuilder.Clear();
@@ -133,7 +169,7 @@ namespace ABSoftware
                 }
                 else
                 {
-                    if(type.Name.ToLower()[0] == 'u')
+                    if (type.Name.ToLower()[0] == 'u')
                         ToStringBuilder.Append(array[i].ToString().Replace(",", ".").Insert(0, "u"));
                     else
                         ToStringBuilder.Append(array[i].ToString().Replace(",", "."));
