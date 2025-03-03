@@ -34,7 +34,7 @@ namespace ABSoftware
 
         public int Size { get; private set; }
 
-        public int LastIndex { get { return data.Length - 1; } }
+        public int LastIndex { get { return Size - 1; } }
 
         #region Constructors
         public ByteBuilder()
@@ -68,9 +68,9 @@ namespace ABSoftware
 
         public void Append(byte[] data)
         {
-            if (Size + data.Length <= this.data.Length)
-                ControlCapacity(Size + data.Length);
+            ControlCapacity(Size + data.Length);
             Buffer.BlockCopy(data, 0, this.data, Size, data.Length);
+            Size += data.Length;
         }
 
         public void Append(params byte[][] data)
@@ -90,9 +90,10 @@ namespace ABSoftware
 
         public void Fill(int startIndex, int endIndex, byte data)
         {
-            byte[] array = new byte[endIndex - startIndex + 1];
-            for (int i = 0; i < array.Length; i++) array[i] = data;
-            Buffer.BlockCopy(array, 0, this.data, startIndex, array.Length);
+            for(int i = startIndex; i <= endIndex; i++)
+            {
+                this.data[i] = data;
+            }
         }
 
         public void Clear()
