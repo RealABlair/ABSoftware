@@ -6,49 +6,85 @@ namespace ABSoftware
     {
         byte[] data = null;
 
-        public int Size { get { return data.Length; } }
+        public int Capacity
+        {
+            get { return data.Length; }
+            set
+            {
+                byte[] newArray = new byte[value];
+                Array.Copy(data, 0, newArray, 0, Size);
+                data = newArray;
+            }
+        }
+
+        void ControlCapacity(int minCapacity)
+        {
+            if (this.data.Length < minCapacity)
+            {
+                int newCapacity = (data.Length == 0) ? 4 : (data.Length * 2);
+
+                if (newCapacity > int.MaxValue - 8)
+                    newCapacity = int.MaxValue - 8;
+                if (newCapacity < minCapacity)
+                    newCapacity = minCapacity;
+
+                this.Capacity = newCapacity;
+            }
+        }
+
+        public int Size { get; private set; }
+
         public int LastIndex { get { return data.Length - 1; } }
 
         #region Constructors
         public ByteBuilder()
         {
             data = new byte[0];
+            Size = 0;
         }
 
         public ByteBuilder(int length)
         {
             data = new byte[length];
+            ControlCapacity(length);
+            Size = length;
         }
 
         public ByteBuilder(byte[] data)
         {
             this.data = data;
+            ControlCapacity(data.Length);
+            Size = data.Length;
         }
         #endregion
 
+        public void Append(byte data)
+        {
+            if (Size == this.data.Length)
+                ControlCapacity(Size + 1);
+            this.data[Size] = data;
+            Size++;
+        }
+
         public void Append(byte[] data)
         {
-            int dataLength = this.data.Length;
-            Array.Resize(ref this.data, this.data.Length + data.Length);
-            Buffer.BlockCopy(data, 0, this.data, dataLength, data.Length);
+            if (Size + data.Length <= this.data.Length)
+                ControlCapacity(Size + data.Length);
+            Buffer.BlockCopy(data, 0, this.data, Size, data.Length);
         }
 
         public void Append(params byte[][] data)
         {
             for (int i = 0; i < data.Length; i++)
             {
-                int dataLength = this.data.Length;
-                Array.Resize(ref this.data, this.data.Length + data[i].Length);
-                Buffer.BlockCopy(data[i], 0, this.data, dataLength, data[i].Length);
+                Append(data[i]);
             }
         }
 
         public void Append(int startIndex, byte[] data)
         {
-            int dataLength = this.data.Length;
-            if (dataLength < data.Length + startIndex)
-                dataLength = data.Length + startIndex;
-            Array.Resize(ref this.data, dataLength);
+            if (Size + data.Length <= this.data.Length)
+                ControlCapacity(Size + data.Length + startIndex);
             Buffer.BlockCopy(data, 0, this.data, startIndex, data.Length);
         }
 
@@ -59,9 +95,10 @@ namespace ABSoftware
             Buffer.BlockCopy(array, 0, this.data, startIndex, array.Length);
         }
 
-        public void Clear(int size = 0)
+        public void Clear()
         {
-            this.data = new byte[size];
+            if (this.Size > 0)
+                Array.Clear(data, 0, Size);
         }
 
         public byte[] GetRange(int startIndex, int length)
@@ -73,8 +110,8 @@ namespace ABSoftware
 
         public byte[] ToArray()
         {
-            byte[] copy = new byte[this.data.Length];
-            Array.Copy(this.data, 0, copy, 0, this.data.Length);
+            byte[] copy = new byte[Size];
+            Array.Copy(this.data, 0, copy, 0, Size);
             return copy;
         }
 
@@ -83,7 +120,7 @@ namespace ABSoftware
             int pos = -1;
             int num = 0;
             bool found = false;
-            while (pos < this.data.Length - array.Length && !found)
+            while (pos < Size - array.Length && !found)
             {
                 pos++;
                 if (this.data[pos] == array[0] && this.data[pos + 1] == array[1])
@@ -111,9 +148,9 @@ namespace ABSoftware
 
         public int IndexOf(byte[] array)
         {
-            if (array.Length > this.data.Length)
+            if (array.Length > Size)
                 return -1;
-            for (int i = 0; i < this.data.Length - array.Length + 1; i++)
+            for (int i = 0; i < Size - array.Length + 1; i++)
             {
                 bool found = true;
                 for (int j = 0; j < array.Length; j++)
@@ -143,18 +180,18 @@ namespace ABSoftware
         public void RemoveAt(int index)
         {
             Array.Copy(this.data, index + 1, this.data, index, this.Size - index - 1);
-            Array.Resize(ref this.data, this.Size - 1);
+            Size--;
         }
 
         public void Remove(int startIndex, int length)
         {
-            Array.Copy(this.data, startIndex+length, this.data, startIndex, this.Size - startIndex - length);
-            Array.Resize(ref this.data, this.Size - length);
+            Array.Copy(this.data, startIndex + length, this.data, startIndex, this.Size - startIndex - length);
+            Size -= length;
         }
 
         public bool EndsWith(byte[] array)
         {
-            int startIndex = this.data.Length - array.Length;
+            int startIndex = Size - array.Length;
             int num = 0;
             for (int i = 0; i < array.Length; i++)
             {
@@ -190,9 +227,9 @@ namespace ABSoftware
         public override string ToString()
         {
             string text = "";
-            for (int i = 0; i < this.data.Length; i++)
+            for (int i = 0; i < Size; i++)
             {
-                if (i < this.data.Length - 1)
+                if (i < Size - 1)
                     text += $"{data[i].ToString("X2")} ";
                 else
                     text += $"{data[i].ToString("X2")}";
