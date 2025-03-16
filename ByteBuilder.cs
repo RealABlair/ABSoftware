@@ -88,9 +88,28 @@ namespace ABSoftware
             Buffer.BlockCopy(data, 0, this.data, startIndex, data.Length);
         }
 
+        public void Insert(int atIndex, byte[] data, bool insertBeforeIndex = true)
+        {
+            if (Size + data.Length <= this.data.Length)
+                ControlCapacity(Size + data.Length);
+
+            if(insertBeforeIndex)
+            {
+                byte[] temp = GetRange(atIndex, Size - atIndex);
+                Remove(atIndex, Size - atIndex);
+                Append(data, temp);
+            }
+            else
+            {
+                byte[] temp = GetRange(atIndex + 1, Size - atIndex - 1);
+                Remove(atIndex + 1, Size - atIndex - 1);
+                Append(data, temp);
+            }
+        }
+
         public void Fill(int startIndex, int endIndex, byte data)
         {
-            for(int i = startIndex; i <= endIndex; i++)
+            for (int i = startIndex; i <= endIndex; i++)
             {
                 this.data[i] = data;
             }
