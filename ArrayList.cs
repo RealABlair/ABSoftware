@@ -1,30 +1,30 @@
-﻿using System;
+using System;
 
 namespace ABSoftware
 {
-    public class NewArrayList<T>
+    public class ArrayList<T>
     {
         T[] elements = null;
 
-        public int Capacity 
-        { 
-            get { return elements.Length; } 
-            set 
+        public int Capacity
+        {
+            get { return elements.Length; }
+            set
             {
                 T[] newArray = new T[value];
                 Array.Copy(elements, 0, newArray, 0, Size);
                 elements = newArray;
-            } 
+            }
         }
         public int Size { get; private set; }
 
-        public NewArrayList()
+        public ArrayList()
         {
             this.elements = new T[0];
             this.Size = 0;
         }
 
-        public NewArrayList(T[] elements)
+        public ArrayList(T[] elements)
         {
             this.elements = elements;
             this.Size = elements.Length;
@@ -53,7 +53,7 @@ namespace ABSoftware
 
         void ControlCapacity(int minCapacity)
         {
-            if(this.elements.Length < minCapacity)
+            if (this.elements.Length < minCapacity)
             {
                 int newCapacity = (elements.Length == 0) ? 4 : (elements.Length * 2);
 
@@ -139,9 +139,9 @@ namespace ABSoftware
             return -1;
         }
 
-        public NewArrayList<T> Copy()
+        public ArrayList<T> Copy()
         {
-            NewArrayList<T> newList = new NewArrayList<T>();
+            ArrayList<T> newList = new ArrayList<T>();
             Array.Copy(elements, 0, newList.elements, 0, Size);
             return newList;
         }
