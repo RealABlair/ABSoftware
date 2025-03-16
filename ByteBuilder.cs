@@ -118,7 +118,11 @@ namespace ABSoftware
         public void Clear()
         {
             if (this.Size > 0)
+            {
                 Array.Clear(data, 0, Size);
+                Size = 0;
+                ControlCapacity(0);
+            }
         }
 
         public byte[] GetRange(int startIndex, int length)
