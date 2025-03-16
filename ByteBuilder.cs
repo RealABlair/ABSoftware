@@ -135,6 +135,11 @@ namespace ABSoftware
             return copy;
         }
 
+        public byte[] GetArrayReference()
+        {
+            return data;
+        }
+
         public bool Contains(byte[] array)
         {
             int pos = -1;
