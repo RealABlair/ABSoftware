@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
@@ -357,12 +357,15 @@ namespace ABSoftware
             byte[] buffer = new byte[8];
             long pointerAddress = address;
             ReadProcessMemory(Handle, (IntPtr)address, buffer, buffer.Length, out int lpNumberOfBytesRead);
+            Console.WriteLine($"{BitConverter.ToInt64(buffer, 0):X8}");
             for(int i = 0; i < offsets.Length; i++)
             {
-                long stepAddress = (long)(buffer[7] << 56 | buffer[6] << 48 | buffer[5] << 40 | buffer[4] << 32 | buffer[3] << 24 | buffer[2] << 16 | buffer[1] << 8 | buffer[0]);
+                long stepAddress = ((long)buffer[7] << 56 | (long)buffer[6] << 48 | (long)buffer[5] << 40 | (long)buffer[4] << 32 | (long)buffer[3] << 24 | (long)buffer[2] << 16 | (long)buffer[1] << 8 | (long)buffer[0]);
                 stepAddress += offsets[i];
                 pointerAddress = stepAddress;
+                Console.WriteLine(":: " + pointerAddress.ToString("X8"));
                 ReadProcessMemory(Handle, (IntPtr)stepAddress, buffer, buffer.Length, out lpNumberOfBytesRead);
+                pointerAddress = ((long)buffer[7] << 56 | (long)buffer[6] << 48 | (long)buffer[5] << 40 | (long)buffer[4] << 32 | (long)buffer[3] << 24 | (long)buffer[2] << 16 | (long)buffer[1] << 8 | (long)buffer[0]);
             }
             return pointerAddress;
         }
