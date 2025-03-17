@@ -344,7 +344,7 @@ namespace ABSoftware
                 stepAddress += offsets[i];
                 pointerAddress = stepAddress;
                 ReadProcessMemory(Handle, (IntPtr)stepAddress, buffer, buffer.Length, out lpNumberOfBytesRead);
-                pointerAddress = (int)(buffer[3] << 24 | buffer[2] << 16 | buffer[1] << 8 | buffer[0]);
+                //pointerAddress = (int)(buffer[3] << 24 | buffer[2] << 16 | buffer[1] << 8 | buffer[0]);
             }
             return pointerAddress;
         }
