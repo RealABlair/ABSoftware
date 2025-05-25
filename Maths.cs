@@ -73,6 +73,44 @@ namespace ABSoftware
             return value;
         }
 
+        public static float RoundTo(float min, float max, float value)
+        {
+            value %= max;
+
+            if (value < min)
+                value += max;
+
+            return value;
+        }
+
+        public static float RoundToNew(float min, float max, float value)
+        {
+            if (value > max)
+                value = min + (value % max);
+            if (value < min)
+                if (min == 0f)
+                    value = max + value;
+                else
+                    value = max + (value % min);
+
+            return value;
+        }
+
+        public static float SmoothApproach(float value, float target, float smoothness)
+        {
+            return value + (target - value) * smoothness;
+        }
+
+        public static float Clamp(float value, float min, float max)
+        {
+            if (value < min)
+                return min;
+            if (value > max)
+                return max;
+
+            return value;
+        }
+
         public class Random
         {
             static System.Random rnd = new System.Random();
