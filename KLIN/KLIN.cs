@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 
 namespace ABSoftware
@@ -233,7 +233,7 @@ namespace ABSoftware
                 string currentIndent = Indent(indent);
                 sb.AppendLine(currentIndent + "(");
                 indent += 1;
-                for (int i = 0; i < token.Children.Length; i++)
+                for (int i = 0; i < token.ChildrenCount; i++)
                 {
                     sb.Append(WriteHelper(ref token.Children[i], ref indent));
                 }
