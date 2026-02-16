@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -76,13 +76,18 @@ namespace ABSoftware.UI
             }
         }
 
+        Thread animationThread;
         protected override void OnCheckedChanged(EventArgs e)
         {
             base.OnCheckedChanged(e);
             if(toggleAnimations)
             {
-                forceEndAnimation = true;
-                Thread t = new Thread(() =>
+                if(animationThread != null && animationThread.IsAlive)
+                {
+                    forceEndAnimation = true;
+                    animationThread.Abort();
+                }
+                animationThread = new Thread(() =>
                 {
                     forceEndAnimation = false;
                     bool done = false;
@@ -116,8 +121,8 @@ namespace ABSoftware.UI
                     targetForegroundColor = default(ColorF);
                     target = 0;
                 });
-                t.IsBackground = true;
-                t.Start();
+                animationThread.IsBackground = true;
+                animationThread.Start();
             }
         }
 
