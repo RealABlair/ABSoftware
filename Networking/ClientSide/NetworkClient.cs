@@ -3,6 +3,7 @@ using System.Threading;
 using System.Net;
 using System.Net.Sockets;
 using ABSoftware.Networking.Packets;
+using System.Reflection;
 
 namespace ABSoftware.Networking.ClientSide
 {
@@ -19,10 +20,25 @@ namespace ABSoftware.Networking.ClientSide
 
         ByteBuilder byteBuilder = new ByteBuilder();
 
+        internal bool useReflection = false;
+        ArrayList<PacketHandlerData> packetHandlers = null;
+
         public NetworkClient(string IP, int Port)
         {
             this.IP = IP;
             this.Port = Port;
+        }
+
+        public NetworkClient(string IP, int Port, bool useReflection)
+        {
+            this.IP = IP;
+            this.Port = Port;
+            this.useReflection = useReflection;
+
+            if(useReflection)
+            {
+                packetHandlers = new ArrayList<PacketHandlerData>();
+            }
         }
 
         public bool Connect()
@@ -100,16 +116,105 @@ namespace ABSoftware.Networking.ClientSide
                 int endingIndex = -1;
                 while ((endingIndex = byteBuilder.IndexOf(PacketManager.PacketEnding)) != -1)
                 {
-                    OnPacketIncome(PacketManager.GetPacket(byteBuilder.GetRange(0, endingIndex)));
+                    IPacket packet = PacketManager.GetPacket(byteBuilder.GetRange(0, endingIndex));
+                    if(useReflection)
+                    {
+                        OnPacketIncomeReflection(packet);
+                    }
+                    OnPacketIncome(packet);
                     byteBuilder.RemoveFirstElements(endingIndex + PacketManager.PacketEnding.Length);
                 }
                 //byteBuilder.Clear();
             }
         }
 
+        /// <summary>
+        /// Registers a packet handler.
+        /// </summary>
+        /// <param name="handlerType">Handler instance</param>
+        public void RegisterHandler(object handlerObject)
+        {
+            if (!useReflection)
+                return;
+
+            MethodInfo[] methodInfos = handlerObject.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic);
+            for (int m = 0; m < methodInfos.Length; m++)
+            {
+                PacketHandlerAttribute attribute = methodInfos[m].GetPacketHandlerAttribute();
+                if (attribute != null)
+                {
+                    bool done = false;
+                    for (int i = 0; i < packetHandlers.Size; i++)
+                    {
+                        if (packetHandlers[i].packetType == attribute.packetType)
+                        {
+                            packetHandlers[i].packetHandlers.Add((methodInfos[m], methodInfos[m].IsStatic ? null : handlerObject));
+                            done = true;
+                        }
+                    }
+
+                    if (!done)
+                    {
+                        packetHandlers.Add(new PacketHandlerData(attribute.packetType));
+                        packetHandlers[packetHandlers.Size - 1].packetHandlers.Add((methodInfos[m], methodInfos[m].IsStatic ? null : handlerObject));
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Registers a packet handler. Note that non-static methods will not be registered.
+        /// </summary>
+        /// <param name="handlerType">Handler type</param>
+        public void RegisterHandler(Type handlerType)
+        {
+            if (!useReflection)
+                return;
+
+            MethodInfo[] methodInfos = handlerType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic);
+            for (int m = 0; m < methodInfos.Length; m++)
+            {
+                if (!methodInfos[m].IsStatic)
+                    continue;
+                PacketHandlerAttribute attribute = methodInfos[m].GetPacketHandlerAttribute();
+                if (attribute != null)
+                {
+                    bool done = false;
+                    for (int i = 0; i < packetHandlers.Size; i++)
+                    {
+                        if (packetHandlers[i].packetType == attribute.packetType)
+                        {
+                            packetHandlers[i].packetHandlers.Add((methodInfos[m], null));
+                            done = true;
+                        }
+                    }
+
+                    if (!done)
+                    {
+                        packetHandlers.Add(new PacketHandlerData(attribute.packetType));
+                        packetHandlers[packetHandlers.Size - 1].packetHandlers.Add((methodInfos[m], null));
+                    }
+                }
+            }
+        }
+
         public virtual void OnStart() { }
         public virtual void OnStop() { }
         public virtual void OnPacketIncome(IPacket packet) { }
+        internal void OnPacketIncomeReflection(IPacket packet)
+        {
+            Type packetType = packet.GetType();
+            for(int i = 0; i < packetHandlers.Size; i++)
+            {
+                if(packetType == packetHandlers[i].packetType)
+                {
+                    for(int j = 0; j < packetHandlers[i].packetHandlers.Size; j++)
+                    {
+                        packetHandlers[i].packetHandlers[j].Item1.Invoke(packetHandlers[i].packetHandlers[j].Item2, new object[] { packet });
+                    }
+                    break;
+                }
+            }
+        }
     }
 }
-
