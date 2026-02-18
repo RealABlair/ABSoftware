@@ -16,7 +16,7 @@ namespace ABSoftware
             this.Seed = Seed;
         }
 
-        private uint GetRandom()
+        public uint GetRandom()
         {
             this.Seed += 0xA5F23012;
             ulong buffer;
@@ -135,3 +135,4 @@ namespace ABSoftware
         }
     }
 }
+
