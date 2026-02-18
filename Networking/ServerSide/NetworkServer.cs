@@ -246,7 +246,7 @@ namespace ABSoftware.Networking.ServerSide
                     parent.OnPacketIncome(this, PacketManager.GetPacket(byteBuilder.GetRange(0, endingIndex)));
                     byteBuilder.RemoveFirstElements(endingIndex + PacketManager.PacketEnding.Length);
                 }
-                byteBuilder.Clear();
+                //byteBuilder.Clear();
             }
         }
 
@@ -271,3 +271,4 @@ namespace ABSoftware.Networking.ServerSide
         }
     }
 }
+
