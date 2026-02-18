@@ -204,6 +204,7 @@ namespace ABSoftware
             byte[] newArray = new byte[data.Length - count];
             Buffer.BlockCopy(oldArray, count, newArray, 0, data.Length - count);
             this.data = newArray;
+            Size -= count;
         }
 
         public void RemoveAt(int index)
