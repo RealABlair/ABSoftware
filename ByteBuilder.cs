@@ -179,20 +179,31 @@ namespace ABSoftware
         {
             if (array.Length > Size)
                 return -1;
-            for (int i = 0; i < Size - array.Length + 1; i++)
+
+            int[] shiftTable = new int[256];
+            int patternLength = array.Length;
+
+            for (int i = 0; i < 256; i++)
+                shiftTable[i] = patternLength;
+
+            for (int i = 0; i < patternLength - 1; i++)
+                shiftTable[array[i]] = patternLength - i - 1;
+
+            int position = 0;
+            while (position <= Size - patternLength)
             {
-                bool found = true;
-                for (int j = 0; j < array.Length; j++)
+                int i;
+                for (i = patternLength - 1; i >= 0; i--)
                 {
-                    if (this.data[i + j] != array[j])
+                    if (data[position + i] != array[i])
                     {
-                        found = false;
+                        position += shiftTable[data[position + patternLength - 1]];
                         break;
                     }
                 }
-                if (found)
+                if (i < 0)
                 {
-                    return i;
+                    return position;
                 }
             }
             return -1;
