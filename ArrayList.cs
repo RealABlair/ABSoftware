@@ -74,6 +74,48 @@ namespace ABSoftware
             Size++;
         }
 
+        public void Add(T[] elements)
+        {
+            Insert(this.Size, elements);
+        }
+
+        public void Insert(int index, T element)
+        {
+            if (index > this.Size)
+                return;
+
+            ControlCapacity(this.Size + 1);
+
+            if(index < this.Size)
+            {
+                Array.Copy(this.elements, index, this.elements, index + 1, this.Size - index);
+            }
+
+            this.elements[index] = element;
+            this.Size++;
+        }
+
+        public void Insert(int index, T[] elements)
+        {
+            if (index > this.Size)
+                return;
+
+            int length = elements.Length;
+            if (length > 0)
+            {
+                ControlCapacity(this.Size + length);
+
+                if(index < this.Size)
+                {
+                    Array.Copy(this.elements, index, this.elements, index + length, this.Size - index);
+                }
+
+                Array.Copy(elements, 0, this.elements, index, length);
+
+                this.Size += length;
+            }
+        }
+
         public void Remove(T element)
         {
             for (int i = 0; i < Size; i++)
@@ -141,8 +183,9 @@ namespace ABSoftware
 
         public ArrayList<T> Copy()
         {
-            ArrayList<T> newList = new ArrayList<T>();
-            Array.Copy(elements, 0, newList.elements, 0, Size);
+            T[] array = new T[Size];
+            Array.Copy(elements, 0, array, 0, Size);
+            ArrayList<T> newList = new ArrayList<T>(array);
             return newList;
         }
 
@@ -161,23 +204,11 @@ namespace ABSoftware
                     if (sortingType < -1)
                         sortingType = -1;
 
-                    switch (sortingType)
+                    if(sortingType > 0)
                     {
-                        case -1:
-                            {
-                                T buffer = elements[j];
-                                elements[j] = elements[i];
-                                elements[i] = buffer;
-                            }
-                            break;
-                        case 0:
-                            break;
-                        case 1:
-                            {
-                                elements[i] = elements[i];
-                                elements[j] = elements[j];
-                            }
-                            break;
+                        T buffer = elements[j];
+                        elements[j] = elements[i];
+                        elements[i] = buffer;
                     }
                 }
             }
