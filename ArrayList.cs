@@ -86,7 +86,7 @@ namespace ABSoftware
 
             ControlCapacity(this.Size + 1);
 
-            if(index < this.Size)
+            if (index < this.Size)
             {
                 Array.Copy(this.elements, index, this.elements, index + 1, this.Size - index);
             }
@@ -105,7 +105,7 @@ namespace ABSoftware
             {
                 ControlCapacity(this.Size + length);
 
-                if(index < this.Size)
+                if (index < this.Size)
                 {
                     Array.Copy(this.elements, index, this.elements, index + length, this.Size - index);
                 }
@@ -116,16 +116,18 @@ namespace ABSoftware
             }
         }
 
-        public void Remove(T element)
+        public bool Remove(T element)
         {
             for (int i = 0; i < Size; i++)
             {
                 if (elements[i].Equals(element))
                 {
                     RemoveAt(i);
-                    break;
+                    return true;
                 }
             }
+
+            return false;
         }
 
         public void RemoveAt(int id)
@@ -134,14 +136,19 @@ namespace ABSoftware
             Size--;
         }
 
-        public void RemoveIf(Func<T, bool> predicate)
+        public int RemoveIf(Func<T, bool> predicate)
         {
+            int removedCount = 0;
             T[] stamp = GetElements();
             for (int i = 0; i < stamp.Length; i++)
             {
                 if (predicate.Invoke(stamp[i]))
+                {
+                    removedCount++;
                     Remove(stamp[i]);
+                }
             }
+            return removedCount;
         }
 
         public void Clear()
@@ -156,6 +163,16 @@ namespace ABSoftware
             for (int i = 0; i < Size; i++)
             {
                 if (elements[i].Equals(element))
+                    return true;
+            }
+            return false;
+        }
+
+        public bool Contains(Func<T, bool> predicate)
+        {
+            for (int i = 0; i < Size; i++)
+            {
+                if (predicate.Invoke(elements[i]))
                     return true;
             }
             return false;
@@ -204,7 +221,7 @@ namespace ABSoftware
                     if (sortingType < -1)
                         sortingType = -1;
 
-                    if(sortingType > 0)
+                    if (sortingType > 0)
                     {
                         T buffer = elements[j];
                         elements[j] = elements[i];
