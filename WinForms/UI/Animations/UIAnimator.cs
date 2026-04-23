@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Threading;
@@ -30,7 +30,7 @@ namespace ABSoftware.UI.Animations
                 }
                 runningAnimations.Remove(animation);
             });
-            t.IsBackground = true;
+            //t.IsBackground = true;
             t.Start();
         }
 
@@ -77,6 +77,27 @@ namespace ABSoftware.UI.Animations
             this.animationStartTime = DateTime.Now;
             this.animationTime = animationTime;
             this.data = data;
+        }
+
+        internal float Lerp(float value, float target, float progress)
+        {
+            return value + (target - value) * progress;
+        }
+
+        internal float QuadraticCurve(float value, float midpointA, float target, float progress)
+        {
+            float a = Lerp(value, midpointA, progress);
+            float b = Lerp(midpointA, target, progress);
+
+            return Lerp(a, b, progress);
+        }
+
+        internal float CubicCurve(float value, float midpointA, float midpointB, float target, float progress)
+        {
+            float a = QuadraticCurve(value, midpointA, midpointB, progress);
+            float b = QuadraticCurve(midpointA, midpointB, target, progress);
+
+            return Lerp(a, b, progress);
         }
 
         public virtual void OnUpdate(float timeElapsed, out float progress, out bool isDone) { progress = 1f; isDone = true; }
