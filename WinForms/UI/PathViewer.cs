@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -43,6 +43,9 @@ namespace ABSoftware.WinForms.UI
         public string ViewerPath { get { return viewerPath; } set { viewerPath = FormatPath(value); UpdateView(); } }
         private string viewerPath;
 
+        [Category("ABSoftware UI"), Description("Folders in the viewer will be active and clickable.")]
+        public bool ActiveFolders { get; set; } = true;
+
         public List<PathViewerFile> Files = new List<PathViewerFile>();
 
         [Category("ABSoftware UI")]
@@ -51,6 +54,9 @@ namespace ABSoftware.WinForms.UI
 
         public PathViewer() : base()
         {
+            this.Size = new Size(250, 250);
+            this.AutoScroll = true;
+
             //Invalidate();
             this.Template = new PathViewerFile();
             this.Controls.Add(Template);
@@ -74,7 +80,8 @@ namespace ABSoftware.WinForms.UI
 
         public void UpdateView()
         {
-            Files.Clear();
+            if (IsInDesignMode || DesignMode)
+                return;
             this.Controls.Clear();
             this.Controls.Add(Template);
 
@@ -83,7 +90,7 @@ namespace ABSoftware.WinForms.UI
 
             this.SuspendLayout();
             string[] directories = Directory.GetDirectories(viewerPath);
-            for(int i = 0; i < directories.Length; i++)
+            for (int i = 0; i < directories.Length; i++)
             {
                 string directory = directories[i] + "\\";
                 PathViewerFile pvf = new PathViewerFile(Template, directory, false);
@@ -91,10 +98,13 @@ namespace ABSoftware.WinForms.UI
                 this.Controls.Add(pvf);
                 this.Controls.SetChildIndex(pvf, 0);
 
-                pvf.SetClickHandler((sender, e) => 
+                if (ActiveFolders)
                 {
-                    ViewerPath = directory;
-                });
+                    pvf.SetClickHandler((sender, e) =>
+                    {
+                        ViewerPath = directory;
+                    });
+                }
             }
             
             string[] files = Directory.GetFiles(viewerPath);
@@ -115,10 +125,13 @@ namespace ABSoftware.WinForms.UI
                     this.Controls.Add(pvf);
                     this.Controls.SetChildIndex(pvf, -1);
 
-                    pvf.SetClickHandler((sender, e) =>
+                    if(ActiveFolders)
                     {
-                        ViewerPath = info.FullName;
-                    });
+                        pvf.SetClickHandler((sender, e) =>
+                        {
+                            ViewerPath = info.FullName;
+                        });
+                    }
                 }
             }
             this.ResumeLayout();
