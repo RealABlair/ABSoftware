@@ -58,6 +58,12 @@ namespace ABSoftware
         }
         #endregion
 
+        public byte this[int index]
+        {
+            get { if (index < Size) return data[index]; else throw new ArgumentOutOfRangeException("Byte index is out of bounds!"); }
+            set { data[index] = value; }
+        }
+
         public void Append(byte data)
         {
             if (Size == this.data.Length)
@@ -93,7 +99,7 @@ namespace ABSoftware
             if (Size + data.Length <= this.data.Length)
                 ControlCapacity(Size + data.Length);
 
-            if(insertBeforeIndex)
+            if (insertBeforeIndex)
             {
                 byte[] temp = GetRange(atIndex, Size - atIndex);
                 Remove(atIndex, Size - atIndex);
