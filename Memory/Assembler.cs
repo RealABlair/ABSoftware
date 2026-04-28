@@ -29,29 +29,29 @@ namespace ABSoftware
         //(mov source, destination) = 0x89 | 0x88; (mov destination, source) = 0x8B | 0x8A; 
         public Assembler MOV(MemoryAddressRegisters a, Registers b, bool destinationFirst = true)
         {
-            if (destinationFirst) EmitMR(0x8B, new Operand(a), new Operand(b), true);
-            else EmitMR(0x89, new Operand(a), new Operand(b), true);
+            if (destinationFirst) EmitMR(0x89, new Operand(a), new Operand(b));
+            else EmitMR(0x8B, new Operand(a), new Operand(b));
 
             return this;
         }
         public Assembler MOV(Registers a, Registers b, bool destinationFirst = true)
         {
-            if (destinationFirst) EmitMR(0x8B, new Operand(a), new Operand(b), true);
-            else EmitMR(0x89, new Operand(a), new Operand(b), true);
+            if (destinationFirst) EmitMR(0x89, new Operand(a), new Operand(b));
+            else EmitMR(0x8B, new Operand(a), new Operand(b));
 
             return this;
         }
         public Assembler MOV(MemoryAddressRegisters a, byte aDisplacement, Registers b, bool destinationFirst = true)
         {
-            if (destinationFirst) EmitMR(0x8B, new Operand(a), new Operand(b), true, aDisplacement);
-            else EmitMR(0x89, new Operand(a), new Operand(b), true, aDisplacement);
+            if (destinationFirst) EmitMR(0x89, new Operand(a), new Operand(b), false, aDisplacement);
+            else EmitMR(0x8B, new Operand(a), new Operand(b), false, aDisplacement);
 
             return this;
         }
         public Assembler MOV(MemoryAddressRegisters a, int aDisplacement, Registers b, bool destinationFirst = true)
         {
-            if (destinationFirst) EmitMR(0x8B, new Operand(a), new Operand(b), true, aDisplacement);
-            else EmitMR(0x89, new Operand(a), new Operand(b), true, aDisplacement);
+            if (destinationFirst) EmitMR(0x89, new Operand(a), new Operand(b), false, aDisplacement);
+            else EmitMR(0x8B, new Operand(a), new Operand(b), false, aDisplacement);
 
             return this;
         }
@@ -618,7 +618,7 @@ namespace ABSoftware
             else
             {
                 byte mod;
-                if (!destination.IsMemory) mod = 0xC0;
+                if (!destination.IsMemory && !source.IsMemory) mod = 0xC0;
                 else if (displacement == 0)
                 {
                     if (destination.Value == 5) mod = 0x40;
