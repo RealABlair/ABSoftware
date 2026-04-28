@@ -1128,6 +1128,8 @@ namespace ABSoftware
 
         public static implicit operator int(Address32 address) => address.address;
         public static implicit operator Address32(int address) => new Address32(address);
+        public static implicit operator uint(Address32 address) => (uint)address.address;
+        public static implicit operator Address32(uint address) => new Address32((int)address);
     }
 
     public struct Address64
