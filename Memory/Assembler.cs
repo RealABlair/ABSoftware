@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace ABSoftware
 {
@@ -72,9 +72,9 @@ namespace ABSoftware
         //EmitImmediate(0x8B, new Operand(register), address);
 
         /// <param name="address">Address (x86) or offset in (x64) apps</param>
-        public Assembler MOV(MemoryAddressRegisters register, Address32 address) { EmitMR(0x8B, new Operand(MemoryAddressRegisters.EAX), new Operand(register), false, address, true); return this; }
+        public Assembler MOV(Registers register, Address32 address) { EmitMR(0x8B, new Operand(MemoryAddressRegisters.EAX), new Operand(register), false, address, true); return this; }
 
-        public Assembler MOV(Address32 address, MemoryAddressRegisters register) { EmitMR(0x89, new Operand(MemoryAddressRegisters.EAX), new Operand(register), false, address, true); return this; }
+        public Assembler MOV(Address32 address, Registers register) { EmitMR(0x89, new Operand(MemoryAddressRegisters.EAX), new Operand(register), false, address, true); return this; }
 
         /*public void MOV(MemoryAddressRegisters register, long addressDistance)
         {
