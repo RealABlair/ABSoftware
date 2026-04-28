@@ -1031,8 +1031,15 @@ namespace ABSoftware
 
             if (type == typeof(float)) return Write(address, BitConverter.GetBytes((float)(object)value));
             if (type == typeof(double)) return Write(address, BitConverter.GetBytes((double)(object)value));
-            
+
             return false;
+        }
+
+        public IntPtr AllocateMemory(int size, MemoryProtection protection)
+        {
+            IntPtr allocatedMemory = VirtualAllocEx(handle, IntPtr.Zero, (uint)size, AllocationType.Commit | AllocationType.Reserve, protection);
+
+            return allocatedMemory;
         }
 
         public bool AllocateMemory(IntPtr address, int size, MemoryProtection protection)
