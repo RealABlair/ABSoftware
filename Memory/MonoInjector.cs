@@ -50,6 +50,12 @@ namespace ABSoftware
                 memory.Write(codeCave + classNameOffset, Encoding.UTF8.GetBytes(entryClass + '\0'));
                 memory.Write(codeCave + methodNameOffset, Encoding.UTF8.GetBytes(entryMethod + '\0'));
 
+                /*assembler.SUB(Registers.RSP, 40);
+                assembler.MOV(Registers.RAX, (long)mono_get_root_domain);
+                assembler.CALL(Registers.RAX);
+                assembler.ADD(Registers.RSP, 40);
+                assembler.RET();*/
+
                 assembler.SUB(Registers.RSP, 40);
 
                 assembler.MOV(Registers.RAX, (long)mono_get_root_domain);
@@ -62,8 +68,8 @@ namespace ABSoftware
                 assembler.CALL(Registers.RAX);
 
                 assembler.MOV(Registers.RAX, (codeCave + domainResultOffset));
-                assembler.MOV(MemoryAddressRegisters.RAX, Registers.RCX);
-                assembler.MOV(Registers.RDX, (Address64)(long)codeCave);
+                assembler.MOV(MemoryAddressRegisters.RAX, Registers.RCX, false);
+                assembler.MOV(Registers.RDX, (long)codeCave);
                 assembler.MOV(Registers.R8, 0);
                 assembler.MOV(Registers.RAX, (long)mono_domain_assembly_open);
                 assembler.CALL(Registers.RAX);
@@ -98,6 +104,10 @@ namespace ABSoftware
 
                 byte[] shellcode = assembler.ToArray();
                 memory.Write(codeCave + codeOffset, shellcode);
+
+                Console.WriteLine($"{codeCave + codeOffset:X16}");
+                Console.WriteLine(assembler.ToString());
+                Console.ReadLine();
 
                 IntPtr threadHandle = Memory.CreateRemoteThread(memory.getHandle(), IntPtr.Zero, 0, (IntPtr)(codeCave + codeOffset), IntPtr.Zero, 0, IntPtr.Zero);
 
