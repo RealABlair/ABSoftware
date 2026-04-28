@@ -29,7 +29,7 @@ namespace ABSoftware
         //(mov source, destination) = 0x89 | 0x88; (mov destination, source) = 0x8B | 0x8A; 
         public Assembler MOV(MemoryAddressRegisters a, Registers b, bool destinationFirst = true)
         {
-            if (destinationFirst) EmitMR(0x8B, new Operand(a), new Operand(b), destinationFirst); 
+            if (destinationFirst) EmitMR(0x8B, new Operand(a), new Operand(b), destinationFirst);
             else EmitMR(0x89, new Operand(a), new Operand(b), destinationFirst);
 
             return this;
@@ -43,7 +43,7 @@ namespace ABSoftware
         }
         public Assembler MOV(MemoryAddressRegisters a, byte aDisplacement, Registers b, bool destinationFirst = true)
         {
-            if(destinationFirst) EmitMR(0x8B, new Operand(a), new Operand(b), destinationFirst, aDisplacement);
+            if (destinationFirst) EmitMR(0x8B, new Operand(a), new Operand(b), destinationFirst, aDisplacement);
             else EmitMR(0x89, new Operand(a), new Operand(b), destinationFirst, aDisplacement);
 
             return this;
@@ -113,7 +113,7 @@ namespace ABSoftware
         public Assembler JNE(int distance) { return JNZ(distance); }
         public Assembler JBE(int distance) { EmitJmp(0x76, 0x86, distance); return this; }
         public Assembler JNA(int distance) { return JBE(distance); }
-        public Assembler JA(int distance) { EmitJmp(0x77, 0x87, distance); return this; } 
+        public Assembler JA(int distance) { EmitJmp(0x77, 0x87, distance); return this; }
         public Assembler JNBE(int distance) { return JA(distance); }
         public Assembler JL(int distance) { EmitJmp(0x7C, 0x8C, distance); return this; }
         public Assembler JNGE(int distance) { return JL(distance); }
@@ -139,6 +139,9 @@ namespace ABSoftware
 
         public Assembler PUSH(Registers register) { EmitShort(0x50, new Operand(register)); return this; }
         public Assembler POP(Registers register) { EmitShort(0x58, new Operand(register)); return this; }
+
+        public Assembler PUSH(int imm) { if (imm >= sbyte.MinValue && imm <= sbyte.MaxValue) EmitImmediate(0x6A, new Operand((byte)0).SetSize(1), imm); else EmitImmediate(0x68, new Operand((byte)0).SetSize(4), imm); return this; }
+        public Assembler PUSH(Address32 address) { EmitImmediate(0xFF, new Operand(MemoryAddressRegisters.EBP), address, 0, 6); return this; }
 
         public Assembler INC_Short(Registers register) { if (is64Bit) return INC(register); else EmitShort(0x40, new Operand(register)); return this; }
         public Assembler DEC_Short(Registers register) { if (is64Bit) return DEC(register); else EmitShort(0x48, new Operand(register)); return this; }
@@ -217,6 +220,13 @@ namespace ABSoftware
         public Assembler XOR(MemoryAddressRegisters destination, int imm, int displacement = 0) { if (destination.Size() == 1) EmitImmediate(0x80, new Operand(destination), imm, displacement, 6); else EmitImmediate(0x81, new Operand(destination), imm, displacement, 6); return this; }
         public Assembler CMP(Registers destination, int imm) { if (destination.Size() == 1) EmitImmediate(0x80, new Operand(destination), imm, extension: 7); else EmitImmediate(0x81, new Operand(destination), imm, extension: 7); return this; }
         public Assembler CMP(MemoryAddressRegisters destination, int imm, int displacement = 0) { if (destination.Size() == 1) EmitImmediate(0x80, new Operand(destination), imm, displacement, 7); else EmitImmediate(0x81, new Operand(destination), imm, displacement, 7); return this; }
+
+        public Assembler ADD(Registers destination, byte imm) { EmitImmediate(0x83, new Operand(destination).SetSize(1), imm, extension: 0); return this; }
+        public Assembler OR(Registers destination, byte imm) { EmitImmediate(0x83, new Operand(destination).SetSize(1), imm, extension: 1); return this; }
+        public Assembler AND(Registers destination, byte imm) { EmitImmediate(0x83, new Operand(destination).SetSize(1), imm, extension: 4); return this; }
+        public Assembler SUB(Registers destination, byte imm) { EmitImmediate(0x83, new Operand(destination).SetSize(1), imm, extension: 5); return this; }
+        public Assembler XOR(Registers destination, byte imm) { EmitImmediate(0x83, new Operand(destination).SetSize(1), imm, extension: 6); return this; }
+        public Assembler CMP(Registers destination, byte imm) { EmitImmediate(0x83, new Operand(destination).SetSize(1), imm, extension: 7); return this; }
 
         public Assembler JMP(string labelName)
         {
@@ -1128,8 +1138,6 @@ namespace ABSoftware
 
         public static implicit operator int(Address32 address) => address.address;
         public static implicit operator Address32(int address) => new Address32(address);
-        public static implicit operator uint(Address32 address) => (uint)address.address;
-        public static implicit operator Address32(uint address) => new Address32((int)address);
     }
 
     public struct Address64
