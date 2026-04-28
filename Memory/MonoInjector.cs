@@ -105,10 +105,6 @@ namespace ABSoftware
                 byte[] shellcode = assembler.ToArray();
                 memory.Write(codeCave + codeOffset, shellcode);
 
-                Console.WriteLine($"{codeCave + codeOffset:X16}");
-                Console.WriteLine(assembler.ToString());
-                Console.ReadLine();
-
                 IntPtr threadHandle = Memory.CreateRemoteThread(memory.getHandle(), IntPtr.Zero, 0, (IntPtr)(codeCave + codeOffset), IntPtr.Zero, 0, IntPtr.Zero);
 
                 if (threadHandle == IntPtr.Zero)
