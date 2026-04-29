@@ -23,7 +23,7 @@ namespace ABSoftware
         public const byte REX_B = 0x41;
         public const byte REX_R = 0x44;
 
-        private readonly AssemblerDictionary<string, int> labels = new AssemblerDictionary<string, int>();
+        private readonly AssemblerDictionary<string, long> labels = new AssemblerDictionary<string, long>();
         private readonly AssemblerList<Fix> fixes = new AssemblerList<Fix>();
 
         //(mov source, destination) = 0x89 | 0x88; (mov destination, source) = 0x8B | 0x8A; 
@@ -186,6 +186,8 @@ namespace ABSoftware
             return this;
         }
 
+        public Assembler JMP(Registers register) { EmitMR(0xFF, new Operand(Registers.ESP), new Operand(register), true, 4); return this; }
+
         public Assembler ADD(Registers destination, Registers source) { if (source.Size() == 1) EmitMR(0x00, new Operand(destination), new Operand(source), true); else EmitMR(0x01, new Operand(destination), new Operand(source), true); return this; }
         public Assembler ADD(MemoryAddressRegisters destination, Registers source) { if (source.Size() == 1) EmitMR(0x00, new Operand(destination), new Operand(source), true); else EmitMR(0x01, new Operand(destination), new Operand(source), true); return this; }
         public Assembler ADD(Registers destination, MemoryAddressRegisters source) { if (destination.Size() == 1) EmitMR(0x02, new Operand(destination), new Operand(source), true); else EmitMR(0x03, new Operand(destination), new Operand(source), true); return this; }
@@ -271,6 +273,23 @@ namespace ABSoftware
             return this;
         }
 
+        public Assembler Label(string labelName, long data)
+        {
+            if (labels.Contains(labelName))
+                return this;
+
+            labels[labelName] = data;
+            return this;
+        }
+
+        public long GetLabelData(string labelName)
+        {
+            if(!labels.Contains(labelName))
+                return -1;
+
+            return labels[labelName];
+        }
+
         public Assembler UpdateLabel(string labelName, int value)
         {
             if(labels.Contains(labelName))
@@ -309,10 +328,10 @@ namespace ABSoftware
         {
             while (fixes.Size > 0)
             {
-                if (!labels.TryGet(fixes[0].LabelName, out int labelPosition))
+                if (!labels.TryGet(fixes[0].LabelName, out long labelPosition))
                     throw new Exception($"Label {fixes[0].LabelName} wasn't defined");
 
-                int delta = labelPosition - (fixes[0].DistanceOffset + fixes[0].DistanceSize);
+                long delta = labelPosition - (fixes[0].DistanceOffset + fixes[0].DistanceSize);
 
                 byte[] deltaBytes = delta.Bytes();
 
