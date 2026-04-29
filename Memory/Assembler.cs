@@ -143,6 +143,11 @@ namespace ABSoftware
         public Assembler PUSH(int imm) { if (imm >= sbyte.MinValue && imm <= sbyte.MaxValue) EmitImmediate(0x6A, new Operand((byte)0).SetSize(1), imm); else EmitImmediate(0x68, new Operand((byte)0).SetSize(4), imm); return this; }
         public Assembler PUSH(Address32 address) { EmitImmediate(0xFF, new Operand(MemoryAddressRegisters.EBP), address, 0, 6); return this; }
 
+        public Assembler PUSHA() { builder.Append(new byte[] { OPERAND_SIZE_PX, 0x60 }); return this; }
+        public Assembler PUSHAD() { builder.Append(0x60); return this; }
+        public Assembler POPA() { builder.Append(new byte[] { OPERAND_SIZE_PX, 0x61 }); return this; }
+        public Assembler POPAD() { builder.Append(0x61); return this; }
+
         public Assembler INC_Short(Registers register) { if (is64Bit) return INC(register); else EmitShort(0x40, new Operand(register)); return this; }
         public Assembler DEC_Short(Registers register) { if (is64Bit) return DEC(register); else EmitShort(0x48, new Operand(register)); return this; }
         public Assembler INC(Registers register)
@@ -284,7 +289,7 @@ namespace ABSoftware
 
         public long GetLabelData(string labelName)
         {
-            if(!labels.Contains(labelName))
+            if (!labels.Contains(labelName))
                 return -1;
 
             return labels[labelName];
@@ -292,7 +297,7 @@ namespace ABSoftware
 
         public Assembler UpdateLabel(string labelName, int value)
         {
-            if(labels.Contains(labelName))
+            if (labels.Contains(labelName))
                 labels[labelName] = value;
 
             return this;
@@ -609,7 +614,7 @@ namespace ABSoftware
 
         void EmitMR(byte opCode, Operand destination, Operand source, bool destinationFirst = false, int displacement = 0, bool isStatic = false)
         {
-            if(destinationFirst)
+            if (destinationFirst)
             {
                 Operand temp = destination;
                 destination = source;
@@ -628,7 +633,7 @@ namespace ABSoftware
 
             builder.Append(opCode);
 
-            if(isStatic && destination.IsMemory)
+            if (isStatic && destination.IsMemory)
             {
                 builder.Append((byte)((source.Value << 3) | 0x05));
 
@@ -687,7 +692,7 @@ namespace ABSoftware
             if (REX > 0x40 || destination.IsNewLow)
                 builder.Append(REX);
 
-            if(extension != -1 || destination.IsMemory)
+            if (extension != -1 || destination.IsMemory)
             {
                 builder.Append(opCode);
 
@@ -705,7 +710,7 @@ namespace ABSoftware
 
                 builder.Append((byte)(mod | (reg << 3) | destination.Value));
 
-                if(displacement != 0)
+                if (displacement != 0)
                 {
                     if (mod == 0x40) builder.Append((byte)displacement);
                     else builder.Append(displacement.Bytes());
@@ -744,10 +749,10 @@ namespace ABSoftware
         void EmitJmp(byte shortOp, byte nearOp, string labelName)
         {
             if (shortOp != 0xEB && shortOp != 0xE8) builder.Append(0x0F);
-            
+
             builder.Append(nearOp);
 
-            fixes.Add(new Fix() 
+            fixes.Add(new Fix()
             {
                 LabelName = labelName,
                 DistanceSize = 4,
@@ -1052,7 +1057,7 @@ namespace ABSoftware
             //invd
         };
 
-        
+
         public static int Value(this Assembler.Registers register)
         {
             return RegisterOffset[(int)register];
@@ -1172,7 +1177,7 @@ namespace ABSoftware
         public static implicit operator Address64(long address) => new Address64(address);
         public static implicit operator Address64(int address) => new Address64(address);
     }
-    
+
     struct Fix
     {
         public string LabelName;
