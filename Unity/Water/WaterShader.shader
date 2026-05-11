@@ -11,6 +11,8 @@ Shader "Custom/WaterShader"
         _Distortion("Distortion Strength", Range(0, 0.1)) = 0.006
         _FresnelPower("Fresnel Power", Range(0.1, 5)) = 1.0
         _NormalMap("Normal Map (Optional)", 2D) = "bump" {}
+        _NormalMapSharpness("Normal Map Sharpness", Float) = 0.8
+        _FlowSpeed("Flow Speed", Float) = 1.0
 
         [Header(Foam Settings)]
         _FoamColor("Foam Color", Color) = (1, 1, 1, 1)
@@ -20,11 +22,14 @@ Shader "Custom/WaterShader"
         _WaveSpeed("Wave Speed", Float) = 0.5
         _WaveHeight("Wave Height", Float) = 0.05
         _WaveFrequency("Wave Frequency", Float) = 1.0
-        _WaveScale("Wave Scale", Float) = 1.0
 
         [Header(Specular Sun)]
         _SpecularColor("Specular Color", Color) = (1, 1, 1, 1)
         _Gloss("Glossiness", Range(8, 256)) = 256
+
+        [Header(Crest Foam Settings)]
+        _CrestThreshold("Crest Start", Range(0, 1)) = 0.8
+        _CrestSoftness("Crest Softness", Range(0.01, 0.5)) = 0.1
     }
     SubShader
     {
@@ -34,7 +39,9 @@ Shader "Custom/WaterShader"
 
         Pass
         {
-            ZWrite Off
+            Cull Back
+            //ZWrite Off
+            ZWrite On
             ZTest LEqual
             Blend SrcAlpha OneMinusSrcAlpha
 
@@ -48,6 +55,8 @@ Shader "Custom/WaterShader"
             sampler2D _BackgroundTexture;
             sampler2D _NormalMap;
             float4 _NormalMap_ST;
+            float _FlowSpeed;
+            float _NormalMapSharpness;
 
             float4 _WaterColor, _DeepColor;
             float _DepthFactor, _Distortion, _FresnelPower;
@@ -55,10 +64,13 @@ Shader "Custom/WaterShader"
             float4 _FoamColor;
             float _FoamAmount;
             
-            float _WaveSpeed, _WaveHeight, _WaveFrequency, _WaveScale;
+            float _WaveSpeed, _WaveHeight, _WaveFrequency;
 
             float4 _SpecularColor;
             float _Gloss;
+
+            float _CrestThreshold;
+            float _CrestSoftness;
 
             struct appdata
             {
@@ -71,31 +83,54 @@ Shader "Custom/WaterShader"
                 float4 pos : SV_POSITION;
                 float4 screenPos : TEXCOORD0;
                 float2 uv : TEXCOORD1;
-                float3 viewDir : TEXCOORD3;
                 float eyeDepth : TEXCOORD4;
                 float3 lightDir : TEXCOORD5;
+                float waveHeightFactor : TEXCOORD6;
+                float3 worldNormal : TEXCOORD7;
+                float3 worldPos : TEXCOORD8;
             };
 
             v2f vert(appdata v)
             {
                 v2f o;
-
                 float3 pos = v.vertex.xyz;
                 float time = _Time.y * _WaveSpeed;
-                float freq = _WaveScale * _WaveFrequency;
+                float freq = _WaveFrequency;
 
-                float wave = (sin(pos.x * freq + time) + cos(pos.z * (freq * 0.8) + time * 1.5)) * _WaveHeight;
+                float w1 = sin(pos.x * freq + time);
+                float w2 = sin((pos.x + pos.z) * freq * 0.7 + time * 1.3);
+                float w3 = cos((pos.z - pos.x) * freq * 2.5 + time * 2.0);
+
+                float wave = (w1 * 0.5 + w2 * 0.3 + w3 * 0.2) * _WaveHeight;
+
+                float f1 = freq;
+                float f2 = freq * 0.7;
+                float f3 = freq * 2.5;
+
+                float dx = (cos(pos.x * freq + time) * freq * 0.5) +
+                    (cos((pos.x + pos.z) * (freq * 0.7) + time * 1.3) * (freq * 0.7) * 0.3) +
+                    (sin((pos.z - pos.x) * (freq * 2.5) + time * 2.0) * (freq * 2.5) * 0.2);
+
+                float dz = (cos((pos.x + pos.z) * (freq * 0.7) + time * 1.3) * (freq * 0.7) * 0.3) -
+                    (sin((pos.z - pos.x) * (freq * 2.5) + time * 2.0) * (freq * 2.5) * 0.2);
+
+
+                float3 normal = normalize(float3(-dx * _WaveHeight, 1.0, -dz * _WaveHeight));
+
+                o.worldNormal = UnityObjectToWorldNormal(normal);
+
                 v.vertex.y += wave;
 
-                o.pos = UnityObjectToClipPos(v.vertex);
+                float4 worldPos = mul(unity_ObjectToWorld, v.vertex);
+                o.pos = mul(UNITY_MATRIX_VP, worldPos);
+                o.worldPos = worldPos.xyz;
+
                 o.screenPos = ComputeScreenPos(o.pos);
                 o.uv = TRANSFORM_TEX(v.uv, _NormalMap);
-
-                float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
-                o.viewDir = normalize(_WorldSpaceCameraPos - worldPos);
                 o.lightDir = normalize(_WorldSpaceLightPos0.xyz);
-                COMPUTE_EYEDEPTH(o.eyeDepth);
+                o.eyeDepth = -mul(UNITY_MATRIX_V, worldPos).z;
 
+                o.waveHeightFactor = (wave / _WaveHeight) * 0.5 + 0.5;
                 return o;
             }
 
@@ -103,12 +138,26 @@ Shader "Custom/WaterShader"
             {
                 float4 screenPos = i.screenPos;
                 float waterZ = i.eyeDepth;
+                float3 viewDir = normalize(_WorldSpaceCameraPos - i.worldPos);
+                float3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
+                float3 halfDir = normalize(lightDir + viewDir);
 
-                float2 distortUV = i.uv * 5.0 + _Time.x * _WaveSpeed;
-                float2 distort = float2(sin(distortUV.x), cos(distortUV.y)) * _Distortion;
+                float2 wUV = i.worldPos.xz * 0.2;
+                float2 flow = _Time.x * _WaveSpeed * _FlowSpeed;
+
+                float3 n1 = UnpackNormal(tex2Dbias(_NormalMap, float4(wUV + flow, 0, -1.0)));
+                float3 n2 = UnpackNormal(tex2Dbias(_NormalMap, float4(wUV * 1.2 - flow * 0.8, 0, -1.0)));
+                float3 detailNormal = normalize(n1 + n2);
+
+                float3 baseNormal = normalize(i.worldNormal);
+                float3 combinedNormal = normalize(float3(
+                    baseNormal.x + detailNormal.x * _NormalMapSharpness,
+                    baseNormal.y,
+                    baseNormal.z + detailNormal.y * _NormalMapSharpness
+                    ));
 
                 float4 distScreenPos = screenPos;
-                distScreenPos.xy += distort * screenPos.w;
+                distScreenPos.xy += (detailNormal.xy * _Distortion) * screenPos.w;
 
                 float sceneZDist = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, UNITY_PROJ_COORD(distScreenPos)));
                 if (sceneZDist < waterZ) distScreenPos = screenPos;
@@ -118,26 +167,49 @@ Shader "Custom/WaterShader"
 
                 fixed4 bg = tex2Dproj(_BackgroundTexture, distScreenPos);
                 float depthExp = saturate(depthDiff / _DepthFactor);
-                float4 waterColor = lerp(_WaterColor, _DeepColor, depthExp);
-                float4 final = lerp(bg, waterColor, waterColor.a);
+                float4 baseColor = lerp(_WaterColor, _DeepColor, depthExp);
 
-                float foamMask = 0;
+                float waveRelief = smoothstep(0.0, 0.7, i.waveHeightFactor);
+                float3 waveTint = lerp(_DeepColor.rgb, _WaterColor.rgb, waveRelief);
+
+                float4 finalWaterColor = baseColor;
+                finalWaterColor.rgb = waveTint;
+
+                float ao = saturate(dot(combinedNormal, float3(0, 1, 0)));
+                finalWaterColor.rgb *= (0.75 + 0.25 * ao);
+
+                float finalAlpha = saturate(baseColor.a + (depthExp * 0.5));
+                float4 final = lerp(bg, finalWaterColor, finalAlpha);
+
+                float shoreFoam = 0;
                 if (depthDiff > 0.01 && depthDiff < _FoamAmount)
                 {
-                    foamMask = 1.0 - saturate(depthDiff / _FoamAmount);
-                    float noise = frac(sin(dot(i.uv ,float2(12.9898,78.233))) * 43758.5453) * 0.02;
-                    foamMask = pow(saturate(foamMask - noise), 3.0);
+                    shoreFoam = 1.0 - saturate(depthDiff / _FoamAmount);
+                    float noise = frac(sin(dot(i.worldPos.xz * 50, float2(12.9898, 78.233))) * 43758.5453) * 0.02;
+                    shoreFoam = pow(saturate(shoreFoam - noise), 3.0);
                 }
-                final.rgb = lerp(final.rgb, _FoamColor.rgb, foamMask * _FoamColor.a);
 
-                float3 viewDir = normalize(i.viewDir);
-                float fresnel = pow(1.0 - saturate(dot(float3(0,1,0), viewDir)), _FresnelPower);
-                final.a = saturate(waterColor.a + fresnel);
+                float crestMask = smoothstep(_CrestThreshold, _CrestThreshold + _CrestSoftness, i.waveHeightFactor);
+                float crestNoise = frac(sin(dot(i.worldPos.xz * 20, float2(12.9898, 78.233))) * 43758.5453);
+                crestMask = saturate(crestMask - crestNoise * 0.2);
 
-                float3 waveNormal = normalize(float3(sin(i.uv.x * 50 + _Time.y), 10, cos(i.uv.y * 50 + _Time.y)));
-                float3 halfDir = normalize(i.lightDir + viewDir);
-                float spec = pow(saturate(dot(waveNormal, halfDir)), _Gloss);
+                float combinedFoam = saturate(shoreFoam + crestMask);
+                final.rgb = lerp(final.rgb, _FoamColor.rgb, combinedFoam * _FoamColor.a);
+
+                float specPower = pow(saturate(dot(combinedNormal, halfDir)), _Gloss);
+                float specWide = pow(saturate(dot(combinedNormal, halfDir)), 8.0) * 0.3;
+                float spec = (specPower + specWide);
+
+                float fresnel = pow(1.0 - saturate(dot(combinedNormal, viewDir)), _FresnelPower);
+
+                final.rgb = lerp(final.rgb, _SpecularColor.rgb * _LightColor0.rgb, fresnel * 0.4);
                 final.rgb += spec * _SpecularColor.rgb * _LightColor0.rgb;
+
+                final.a = saturate(finalWaterColor.a + fresnel);
+
+                float3 skyFake = lerp(_WaterColor.rgb, _SpecularColor.rgb, saturate(combinedNormal.y));
+
+                final.rgb = lerp(final.rgb, skyFake, fresnel * 0.5);
 
                 return final;
             }

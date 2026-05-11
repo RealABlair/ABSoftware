@@ -14,14 +14,18 @@ public class WaterSurface : MonoBehaviour
     public float GetHeightAtPos(Vector3 worldPos)
     {
         float h = material.GetFloat("_WaveHeight");
-        float f = material.GetFloat("_WaveFrequency") * material.GetFloat("_WaveScale");
+        float f = material.GetFloat("_WaveFrequency");
         float s = material.GetFloat("_WaveSpeed");
 
         float time = Time.time * s;
 
-        float wave = (Mathf.Sin(worldPos.x * f + time) +
-                      Mathf.Cos(worldPos.z * (f * 0.8f) + time * 1.5f)) * h;
+        Vector3 localPos = transform.InverseTransformPoint(worldPos);
 
-        return transform.position.y + wave;
+        float w1 = Mathf.Sin(localPos.x * f + time);
+        float w2 = Mathf.Sin((localPos.x + localPos.z) * f * 0.7f + time * 1.3f);
+        float w3 = Mathf.Cos((localPos.z - localPos.x) * f * 2.5f + time * 2.0f);
+
+        float wave = (w1 * 0.5f + w2 * 0.3f + w3 * 0.2f) * h;
+        return transform.position.y + (wave * transform.lossyScale.y);
     }
 }
