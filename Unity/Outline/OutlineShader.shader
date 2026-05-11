@@ -6,6 +6,7 @@ Shader "Unlit/OutlineShader"
         [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest("ZTest", Float) = 0
         _OutlineColor ("Outline Color", Color) = (1, 1, 1, 1)
         _OutlineWidth ("Outline Width", Float) = 1
+        [Toggle] _ConstantScaling("Constant Scaling", Int) = 1
     }
     SubShader
     {
@@ -14,7 +15,7 @@ Shader "Unlit/OutlineShader"
         Pass
         {
             ZTest [_ZTest]
-            Cull Front
+            Cull Off
             Blend SrcAlpha OneMinusSrcAlpha
 
             Stencil {
@@ -32,6 +33,7 @@ Shader "Unlit/OutlineShader"
             {
                 float4 vertex : POSITION;
                 float3 normal : NORMAL;
+                float3 smoothNormal : TEXCOORD1;
             };
 
             struct v2f
@@ -42,20 +44,25 @@ Shader "Unlit/OutlineShader"
 
             uniform fixed4 _OutlineColor;
             uniform float _OutlineWidth;
+            int _ConstantScaling;
 
-            v2f vert (appdata v)
+            v2f vert(appdata v)
             {
                 v2f o;
-
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-                float3 normal = v.normal;
-                float3 viewPosition = UnityObjectToViewPos(v.vertex);
+                float3 pos = v.vertex.xyz;
 
-                o.position = UnityObjectToClipPos(v.vertex * _OutlineWidth);
+                float isSmoothReady = step(0.001, length(v.smoothNormal));
+
+                float3 outlineDir = lerp(v.normal, v.smoothNormal, isSmoothReady);
+
+                pos += outlineDir * _OutlineWidth * 0.01;
+
+                o.position = UnityObjectToClipPos(float4(pos, 1.0));
                 o.color = _OutlineColor;
-                
+
                 return o;
             }
 
