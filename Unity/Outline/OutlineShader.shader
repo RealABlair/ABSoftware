@@ -6,7 +6,6 @@ Shader "Unlit/OutlineShader"
         [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest("ZTest", Float) = 0
         _OutlineColor ("Outline Color", Color) = (1, 1, 1, 1)
         _OutlineWidth ("Outline Width", Float) = 1
-        [Toggle] _ConstantScaling("Constant Scaling", Int) = 1
     }
     SubShader
     {
@@ -44,7 +43,6 @@ Shader "Unlit/OutlineShader"
 
             uniform fixed4 _OutlineColor;
             uniform float _OutlineWidth;
-            int _ConstantScaling;
 
             v2f vert(appdata v)
             {
