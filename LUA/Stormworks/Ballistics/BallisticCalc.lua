@@ -28,9 +28,10 @@ function onTick()
 	if caz then
 		output.setNumber(1, 0)
 		output.setNumber(2, 0)
+		output.setNumber(3, -1)
 		return
 	end
-	
+	ttf=0
 	while b-a>e*2 do
 		c=(a+b)/2
 	
@@ -50,6 +51,7 @@ function onTick()
 	pitch=a/90
 	output.setNumber(1, yaw)
 	output.setNumber(2, pitch)
+	output.setNumber(3, ttf)
 end
 	
 function f(ang,dst,dff)
@@ -57,7 +59,7 @@ function f(ang,dst,dff)
 	y=0
 	vx=math.cos(ang*d2r)*velocity
 	vy=math.sin(ang*d2r)*velocity
-	for i=0,lifetime-1 do
+	for i=1,lifetime do
 		x=x+(vx/60)
 		y=y+(vy/60)
 		
@@ -66,6 +68,7 @@ function f(ang,dst,dff)
 		vy=vy-(g/60)
 		
 		if x>=dst then
+			ttf=i
 			break
 		end
 	end
