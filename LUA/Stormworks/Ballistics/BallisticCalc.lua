@@ -1,3 +1,12 @@
+data={}
+data[0]={800,120,0.005}
+data[1]={1000,150,0.02}
+data[2]={1000,300,0.01}
+data[3]={900,600,0.005}
+data[4]={800,1500,0.002}
+data[5]={700,2400,0.001}
+data[6]={600,2400,0.0005}
+
 velocity=800
 lifetime=1500
 coeff=0.002
@@ -13,6 +22,10 @@ function onTick()
 	ty=input.getNumber(4)
 	tz=input.getNumber(7)
 	cmps=input.getNumber(5)
+	wt=property.getNumber("Weapon Type")
+	velocity=data[wt][1]
+	lifetime=data[wt][2]
+	coeff=data[wt][3]
 	
 	dx=tx-sx
 	dy=ty-sy
@@ -50,7 +63,8 @@ function onTick()
 	f(a,h,dz)
 	yaw=(-math.atan(dy, dx) / (math.pi * 2)) + cmps + 0.25
 	pitch=a/90
-	output.setNumber(1, yaw)
+	
+	output.setNumber(1, ((yaw + 0.5) % 1.0) - 0.5)
 	output.setNumber(2, pitch)
 	output.setNumber(3, ttf)
 end
