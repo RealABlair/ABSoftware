@@ -20,7 +20,7 @@ function onTick()
 	h=math.sqrt(dx*dx+dy*dy)
 	
 	a=0 b=0 c=0 e=0.01
-	if ind then a=45 b=85
+	if ind then a=45 b=90
 	else a=-10 b=45 end
 	
 	caz=(tx==0 and ty==0)
@@ -32,8 +32,9 @@ function onTick()
 		return
 	end
 	ttf=0
+	
 	while b-a>e*2 do
-		c=(a+b)/2
+		c=(a+b)*0.5
 	
 		era=f(a,h,dz)
 		erc=f(c,h,dz)
@@ -46,7 +47,7 @@ function onTick()
 	end
 	
 	a=(a+b)*0.5
-	
+	f(a,h,dz)
 	yaw=(-math.atan(dy, dx) / (math.pi * 2)) + cmps + 0.25
 	pitch=a/90
 	output.setNumber(1, yaw)
@@ -59,6 +60,7 @@ function f(ang,dst,dff)
 	y=0
 	vx=math.cos(ang*d2r)*velocity
 	vy=math.sin(ang*d2r)*velocity
+	flag=false
 	for i=1,lifetime do
 		x=x+(vx/60)
 		y=y+(vy/60)
@@ -69,9 +71,10 @@ function f(ang,dst,dff)
 		
 		if x>=dst then
 			ttf=i
+			flag=true
 			break
 		end
 	end
 	
-	return y-dff
+	if flag then return y-dff else return -9999 end
 end
